@@ -38,8 +38,19 @@ const getVehicle = async(req, res) => {
         res.send(vehicle);
     }
     catch(error){
-        res.status(500).send( 'Error retrieving vehicle');
+        res.status(500).send( 'Error retrieving vehicle.');
     }
 }
 
-module.exports = { showCars, getVehiclesAgency, getVehicle }
+const addVehicle = async (req, res) => {
+    try{
+        const db = await connectDB();
+        const collection = db.collection('vehiclesData');
+
+    }
+    catch(error){
+        
+    }
+}
+
+module.exports = { showCars, getVehiclesAgency, getVehicle, addVehicle }
