@@ -32,13 +32,18 @@ const insertUser = async (req, res) => {
         const collection = db.collection('users');
 
         const user = req.body;
+        const options = {
+            ...user,
+            userRole: 'user',
+            accountStatus: 'not verified',
+        }
         const query = { userEmail: user?.userEmail };
         const existUser = await collection.findOne(query);
         if (existUser) {
             return res.send({ message: "user already exists", insertedId: null });
         }
 
-        const result = await collection.insertOne(user);
+        const result = await collection.insertOne(options);
         res.send(result);
     }
     catch (error) {
@@ -65,27 +70,6 @@ const updateOne = async (req, res) => {
     }
 }
 
-const replaceData = async (req, res) => {
-    try {
-        const db = await connectDB();
-        const collection = db.collection('users');
-
-        const email = req.params.email;
-        const info = req.body;
-        const query = { userEmail: email }
-
-        const existUser = await collection.findOne(query);
-        if (!existUser) {
-            return res.send({ message: "This user info is not available", insertedId: null });
-        }     
-        const result = await collection.replaceOne(query, info, { upsert: true });
-        res.send(result);
-    }
-    catch (error) {
-        res.status(500).send('Error retrieving user');
-    }
-}
-
 const addOne = async (req, res) => {
     try {
         const db = await connectDB();
@@ -104,5 +88,34 @@ const addOne = async (req, res) => {
         res.status(500).send('Error retrieving user');
     }
 }
+
+const replaceData = async (req, res) => {
+    try {
+        const db = await connectDB();
+        const collection = db.collection('users');
+
+        const email = req.params.email;
+        const info = req.body;
+        const query = { userEmail: email };
+
+        const options = {
+            ...info,
+            userRole: 'user',
+            accountStatus: 'not verified',
+        }
+
+        const existUser = await collection.findOne(query);
+        if (!existUser) {
+            return res.send({ message: "This user info is not available", insertedId: null });
+        }
+        const result = await collection.replaceOne(query, options, { upsert: true });
+        res.send(result);
+    }
+    catch (error) {
+        res.status(500).send('Error retrieving user');
+    }
+}
+
+
 
 module.exports = { showUsers, getUser, insertUser, updateOne, addOne, replaceData }
