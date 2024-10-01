@@ -23,7 +23,39 @@ const connectDB = async () => {
         console.error(`Error: ${error.message}`);
         process.exit(1);
     }
-
 }
 
 module.exports = connectDB;
+
+
+
+
+// const connectDB = async () => {
+
+//     try {
+//         if (cachedDb) {
+//             return cachedDb;
+//         }
+//         if (!cachedClient) {
+//             cachedClient = new MongoClient(uri, {
+//                 serverApi: {
+//                     version: ServerApiVersion.v1,
+//                     strict: true,
+//                     deprecationErrors: true,
+//                 }
+//             });
+//             await cachedClient.connect();
+//         }
+//         cachedDb = cachedClient.db();
+//         return cachedDb;
+//     }
+//     catch (error) {
+//         console.error(`Error: ${error.message}`);
+//         process.exit(1);
+//     }
+// }
+
+// const getCollection = async (collectionName) => {
+//     const db = await connectDB();
+//     return db.collection(collectionName);
+// };
