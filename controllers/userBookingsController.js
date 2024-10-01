@@ -51,7 +51,34 @@ const getUserBookedCars = async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: 'Error fetching booked cars' });
     }
-
 };
 
-module.exports = { getUserBookedCars, getUserBookings };
+const getFreeCarsForSearchResult = async(req, res) => {
+    try {
+        const db = await connectDB();
+        const bookingsCollection = db.collection('bookings');
+        const carsCollection = db.collection('vehiclesData');
+        const agency = db.collection('agencyData');
+        const data = req.query;
+
+        // adding date and time together and converting them into date object
+        const date_time = `${data.fromDate}T${data.fromTime}`;
+        const new_date = new Date(date_time)
+
+        const result1 = await carsCollection.find({bookingStatus: false}).toArray();
+        console.log(result1);
+        
+        const query = { $and: [{"agencyAddress.division": data.division}, {"agencyAddress.district": data.district}, {"agencyAddress.upazilla": data.upazilla}] }
+        // console.log(query);
+        
+        const result2 = await agency.find(query).toArray()
+        console.log(result2);
+
+        res.send('Data fetched')
+    }
+    catch(error){
+        res.status(500).json({ message: 'Error fetching booked cars' });
+    }
+}
+
+module.exports = { getUserBookedCars, getUserBookings, getFreeCarsForSearchResult };
