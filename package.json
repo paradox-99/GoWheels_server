@@ -18,6 +18,6 @@
     "gowheels-server": "file:",
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.9.0",
-    "mongoose": "^8.6.3"
+    "mongoose": "^8.7.0"
   }
 }
