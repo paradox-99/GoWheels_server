@@ -1,4 +1,5 @@
 const connectDB = require("../config/db")
+const {ObjectId} = require('mongodb')
 
 // api to get all vehicles data
 const showCars = async(req, res) => {
@@ -33,15 +34,14 @@ const getVehicle = async(req, res) => {
         const db = await connectDB();
         const collection = db.collection('vehiclesData');
         const id = req.params.id;
-        const query = { _id: new Object(id)}
-        const vehicle = await collection.find(query).toArray();
+        const query = { _id: new ObjectId(id)}
+        const vehicle = await collection.findOne(query);
         res.send(vehicle);
     }
     catch(error){
-        res.status(500).send( 'Error retrieving vehicle');
+        res.status(500).send( 'Error retrieving vehicle.');
     }
 }
-
 
 const vehiclesInfo = async (req, res) => {
     try {
@@ -61,4 +61,28 @@ const vehiclesInfo = async (req, res) => {
     }
   };
 
-module.exports = { showCars, getVehiclesAgency, getVehicle, vehiclesInfo }
+const addVehicle = async (req, res) => {
+    try{
+        const db = await connectDB();
+        const collection = db.collection('vehiclesData');
+    }
+    catch(error){
+        res.status(500).send( 'Error retrieving vehicle.');
+    }
+}
+
+const getCarsByBrand = async(req, res) => {
+    try{
+        const db = await connectDB();
+        const collection = db.collection('vehiclesData');
+        const brand = req.params.brand;
+        const query = { "vehicle_info.brand": brand }
+        const cars = await collection.find(query).toArray();
+        res.send(cars);
+    }
+    catch(error){
+        res.status(500).send( 'Error retrieving vehicle.');
+    }
+}
+
+module.exports = { showCars, getVehiclesAgency, getVehicle, addVehicle, getCarsByBrand, vehiclesInfo }

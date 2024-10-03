@@ -26,7 +26,6 @@ const getUser = async (req, res) => {
     }
 }
 
-
 const ownerInfo = async (req, res) => {
     try {
         const db = await connectDB();
@@ -39,7 +38,94 @@ const ownerInfo = async (req, res) => {
     }
 };
 
+const insertUser = async (req, res) => {
+    try {
+        const db = await connectDB();
+        const collection = db.collection('users');
 
+        const user = req.body;
+        const options = {
+            ...user,
+            userRole: 'user',
+            accountStatus: 'not verified',
+        }
+        const query = { userEmail: user?.userEmail };
+        const existUser = await collection.findOne(query);
+        if (existUser) {
+            return res.send({ message: "user already exists", insertedId: null });
+        }
 
+        const result = await collection.insertOne(options);
+        res.send(result);
+    }
+    catch (error) {
+        res.status(500).send('Error retrieving user');
+    }
+}
 
-module.exports = { showUsers, getUser, ownerInfo }
+const updateOne = async (req, res) => {
+    try {
+        const db = await connectDB();
+        const collection = db.collection('users');
+
+        const email = req.params.email;
+        const image = req.body;
+        const query = { userEmail: email }
+        const updateDoc = {
+            $set: { image: image?.image }
+        }
+        const result = await collection.updateOne(query, updateDoc);
+        res.send(result);
+    }
+    catch (error) {
+        res.status(500).send('Error retrieving user');
+    }
+}
+
+const addOne = async (req, res) => {
+    try {
+        const db = await connectDB();
+        const collection = db.collection('users');
+
+        const email = req.params.email;
+        const image = req.body;
+        const query = { userEmail: email };
+        const updateDoc = {
+            $set: { circleImage: image.userCropImage }
+        };
+        const result = await collection.updateOne(query, updateDoc);
+        res.send(result);
+    }
+    catch (error) {
+        res.status(500).send('Error retrieving user');
+    }
+}
+
+const replaceData = async (req, res) => {
+    try {
+        const db = await connectDB();
+        const collection = db.collection('users');
+
+        const email = req.params.email;
+        const info = req.body;
+        const query = { userEmail: email };
+
+        const options = {
+            ...info,
+            userRole: 'user',
+            accountStatus: 'not verified',
+        }
+
+        const existUser = await collection.findOne(query);
+        if (!existUser) {
+            return res.send({ message: "This user info is not available", insertedId: null });
+        }
+        const result = await collection.replaceOne(query, options, { upsert: true });
+        res.send(result);
+    }
+    catch (error) {
+        res.status(500).send('Error retrieving user');
+    }
+}
+
+module.exports = { showUsers, getUser, insertUser, updateOne, addOne, replaceData, ownerInfo }
