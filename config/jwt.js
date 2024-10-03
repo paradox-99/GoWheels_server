@@ -6,7 +6,6 @@ const secretKey = process.env.ACCESS_TOKEN_SECRET
 
 const generateToken = (email) => {
     const accessToken = jwt.sign(email, secretKey, { expiresIn: '1h' })
-    console.log({ accessToken });
     return ({ accessToken });
 }
 
