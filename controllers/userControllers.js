@@ -18,7 +18,8 @@ const getUser = async(req, res) => {
         const collection = db.collection('users');
         const email = req.params.email;
         const query = { "email":  email}
-        const user = await collection.find(query).toArray();
+        const user = await collection.findOne(query);
+        console.log(user);
         res.send(user);
     }
     catch(error){
