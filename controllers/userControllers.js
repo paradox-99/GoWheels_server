@@ -17,8 +17,8 @@ const getUser = async (req, res) => {
         const db = await connectDB();
         const collection = db.collection('users');
         const email = req.params.email;
-        const query = { "email": email }
-        const user = await collection.find(query).toArray();
+        const query = { userEmail: email }
+        const user = await collection.findOne(query);
         res.send(user);
     }
     catch (error) {
