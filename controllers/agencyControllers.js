@@ -46,6 +46,7 @@ const agencyInfo = async (req, res) => {
 };
 
 
+
 const agencyOwnerInfo = async (req, res) => {
     try {
         const db = await connectDB();
