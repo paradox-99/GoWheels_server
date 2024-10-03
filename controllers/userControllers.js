@@ -26,6 +26,18 @@ const getUser = async (req, res) => {
     }
 }
 
+const ownerInfo = async (req, res) => {
+    try {
+        const db = await connectDB();
+        const collection = db.collection('users');
+        const ownerData = req.body;
+        const result = await collection.insertOne(ownerData);
+        res.status(201).json({ message: 'Data inserted successfully', result });
+    } catch (error) {
+        res.status(500).json({ message: 'Error inserting data', error });
+    }
+};
+
 const insertUser = async (req, res) => {
     try {
         const db = await connectDB();
@@ -116,6 +128,4 @@ const replaceData = async (req, res) => {
     }
 }
 
-
-
-module.exports = { showUsers, getUser, insertUser, updateOne, addOne, replaceData }
+module.exports = { showUsers, getUser, insertUser, updateOne, addOne, replaceData, ownerInfo }
