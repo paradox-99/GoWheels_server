@@ -45,7 +45,7 @@ const agencyInfo = async (req, res) => {
   }
 };
 
-
+// AGENCY OWNER
 
 const agencyOwnerInfo = async (req, res) => {
     try {
@@ -67,5 +67,26 @@ const agencyOwnerInfo = async (req, res) => {
 };
 
 
+// UPDATE AGENCY
+const updateAgencyOwnerInfo = async (req, res) => {
+    try {
+        const db = await connectDB();
+        const collection = db.collection('users');
 
-module.exports = { showAgency , getAgency, agencyInfo, agencyOwnerInfo }
+        const email = req.params.email;
+        const updatedData = req.body; 
+        const query = { userEmail: email };
+        const updateDoc = {
+            $set: updatedData 
+        };
+        const result = await collection.updateOne(query, updateDoc);
+        if (result.modifiedCount === 0) {
+            return res.status(404).send('User not found or no changes made');
+        }
+        res.status(200).send('User updated successfully');
+    } catch (error) {
+        res.status(500).send('Error updating user: ' + error.message);
+    }
+};
+
+module.exports = { showAgency , getAgency, agencyInfo, agencyOwnerInfo, updateAgencyOwnerInfo }
