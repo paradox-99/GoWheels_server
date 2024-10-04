@@ -23,7 +23,7 @@ app.use('/api/authorization', authRoutes);
 app.use('/api/usersRoute', userRoutes);
 app.use('/api/carsRoute', carRoute);
 app.use('/api/reviewsRoute', reviewsAndRatingsRoute);
-app.use('/api/agencyRoute', agency);
+app.use('/api/agencyRoute', agency); // Ensure this is correct
 app.use('/api/bookings', bookingRoute)
 
 module.exports = app;
