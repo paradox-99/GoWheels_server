@@ -17,9 +17,9 @@ const getUser = async (req, res) => {
         const db = await connectDB();
         const collection = db.collection('users');
         const email = req.params.email;
-        const query = { userEmail: email }
+        const query = { "userEmail": email }
         const user = await collection.findOne(query);
-        console.log(user);
+        console.log("user: ",user);
         res.send(user);
         
     }

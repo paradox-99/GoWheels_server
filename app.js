@@ -13,6 +13,7 @@ const app = express();
 app.use(cors({
     origin: [
         'http://localhost:5173',
+        'https://gowheels-99.web.app'
     ],
     credentials: true
 }
