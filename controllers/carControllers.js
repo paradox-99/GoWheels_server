@@ -43,6 +43,24 @@ const getVehicle = async(req, res) => {
     }
 }
 
+const vehiclesInfo = async (req, res) => {
+    try {
+      const db = await connectDB();
+      const collection = db.collection('vehiclesData');
+      const lastAgency = await collection.findOne({}, { sort: { agency_id: -1 } });
+      let newAgencyId = 1; 
+      if (lastAgency && lastAgency.agency_id) {
+        newAgencyId = parseInt(lastAgency.agency_id.replace('AG', '')) + 1;
+      }
+      const agency_id = `AG${newAgencyId}`;
+      const agencyData = { ...req.body, agency_id };
+      const result = await collection.insertOne(agencyData);
+      res.status(201).json({ message: 'Data inserted successfully', result });
+    } catch (error) {
+      res.status(500).json({ message: 'Error inserting data', error });
+    }
+  };
+
 const addVehicle = async (req, res) => {
     try{
         const db = await connectDB();
@@ -67,4 +85,4 @@ const getCarsByBrand = async(req, res) => {
     }
 }
 
-module.exports = { showCars, getVehiclesAgency, getVehicle, addVehicle, getCarsByBrand }
+module.exports = { showCars, getVehiclesAgency, getVehicle, addVehicle, getCarsByBrand, vehiclesInfo }
