@@ -158,10 +158,9 @@ const addVehicleByAgency = async (req, res) => {
   try {
     const db = await connectDB();
     const collection = db.collection("vehiclesData");
-    const vehicleData = req.body; // Expecting vehicle data from the request body
+    const vehicleData = req.body; 
 
-    // Log the received vehicle data for debugging
-    console.log(vehicleData); // Check if all fields are received
+    // console.log(vehicleData); 
 
     // Insert the vehicle data into the database
     const result = await collection.insertOne(vehicleData);
