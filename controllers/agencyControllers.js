@@ -57,7 +57,7 @@ const agencyOwnerInfo = async (req, res) => {
     if (!ownerData) {
       return res.status(404).send("Agency owner not found");
     }
-    res.send(ownerData); // Send the retrieved data
+    res.send(ownerData);
   } catch (error) {
     console.error("Error retrieving agency owner data:", error);
     res.status(500).send("Error retrieving agency owner data");
@@ -158,16 +158,33 @@ const addVehicleByAgency = async (req, res) => {
   try {
     const db = await connectDB();
     const collection = db.collection("vehiclesData");
-    const vehicleData = req.body; 
+    const vehicleData = req.body;
 
-    // console.log(vehicleData); 
-
-    // Insert the vehicle data into the database
+    // console.log(vehicleData);
     const result = await collection.insertOne(vehicleData);
     res.status(201).send(result); // Respond with the result
   } catch (error) {
     console.error("Error adding vehicle:", error);
     res.status(500).send("Error adding vehicle. Please try again later.");
+  }
+};
+
+// GET THE VEHICLE INFO FOR THAT AGENCY USER
+const getVehicleInfo = async (req, res) => {
+  try {
+    const db = await connectDB();
+    const collection = db.collection("vehiclesData");
+    const email = req.params.email;
+    const query = { "agencyInfo.email": email };
+
+    const vehicleInfo = await collection.find(query).toArray();
+    if (!vehicleInfo) {
+      return res.status(404).send("Vehicle info not found");
+    }
+    res.send(vehicleInfo);
+  } catch (error) {
+    console.error("Error getting vehicle data:", error);
+    res.status(500).send("Error getting vehicle data. Please try again later.");
   }
 };
 
@@ -178,4 +195,5 @@ module.exports = {
   agencyOwnerInfo,
   updateAgencyOwnerInfo,
   addVehicleByAgency,
+  getVehicleInfo,
 };
