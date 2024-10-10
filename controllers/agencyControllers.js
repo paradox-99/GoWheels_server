@@ -93,7 +93,7 @@ const agencyOwnerInfo = async (req, res) => {
         const collection = db.collection("users");
 
         const email = req.params.email; 
-        const ownerData = await collection.findOne(email);
+        const ownerData = await collection.findOne({userEmail: email});
         
         if (!ownerData) {
             return res.status(404).send("Agency owner not found");

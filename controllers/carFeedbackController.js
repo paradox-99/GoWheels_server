@@ -60,7 +60,7 @@ const getCarReviews = async (req, res) => {
                 // }));
                 
 
-        // console.log(reviews);
+    
                 res.status(200).send(reviews);
             } catch (error) {
         res.status(500).send({ message: 'Error fetching car reviews' });
