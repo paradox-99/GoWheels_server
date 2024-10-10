@@ -64,7 +64,7 @@ const order = async (req, res) => {
 
 
             const finalOrder = {
-                product, paidStatus: false, tranjectionId: tran_id
+                product, paidStatus: false, tranjectionId: tran_id, 
             }
 
             const result = paymentCollection.insertOne(finalOrder)
