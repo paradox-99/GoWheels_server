@@ -80,4 +80,41 @@ const getCarReviews = async (req, res) => {
     }
 };
 
-module.exports = { createCarReview, getCarReviews };
+const updateCarReview = async (req, res) => {
+    try {
+        const db = await connectDB();
+        const carReviewsCollection = db.collection('reviews');
+
+        const reviewId = req.params.reviewId;
+        // console.log(reviewId);
+        const { review, rating, agencyResponse } = req.body;
+        // console.log(req.body);
+        if (!review || !rating) {
+            return res.status(400).json({ message: "Review and rating are required." });
+        }
+
+        // Update review
+        const updatedReview = {
+            review,
+            rating,
+            agencyResponse,
+            date: new Date(), 
+        };
+        console.log(updatedReview);
+     
+        const result = await carReviewsCollection.updateOne(
+            { _id: new ObjectId(reviewId) }, 
+            { $set: updatedReview } 
+        );
+
+        if (result.matchedCount === 0) {
+            return res.status(404).json({ message: 'Review not found.' });
+        }
+
+        res.send(result)
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating review', error });
+    }
+};
+
+module.exports = { createCarReview, getCarReviews, updateCarReview };
