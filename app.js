@@ -7,6 +7,7 @@ const carRoute = require('./routes/carRoutes');
 const reviewsAndRatingsRoute = require('./routes/reviewAndRatingRoutes');
 const agency = require('./routes/agencyRoutes');
 const bookingRoute = require('./routes/userBookingRoutes')
+const payment = require('./routes/payment')
 const feedbacksRoute = require('./routes/feedbackRoute')
 
 const app = express();
@@ -26,6 +27,7 @@ app.use('/api/carsRoute', carRoute);
 app.use('/api/reviewsRoute', reviewsAndRatingsRoute);
 app.use('/api/agencyRoute', agency);
 app.use('/api/bookings', bookingRoute)
+app.use('/api/payment', payment)
 app.use('/api/feedbackRoute', feedbacksRoute)
 
 module.exports = app;
