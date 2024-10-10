@@ -2,7 +2,7 @@ const connectDB = require("../config/db");
 const { ObjectId } = require('mongodb');
 
 
-// fetch bookings collection by user -m
+// fetch bookings collection by user with status Pending and Confirmed -m
 const getUserBookings = async (req, res) => {
     try {
         const db = await connectDB();
@@ -11,10 +11,18 @@ const getUserBookings = async (req, res) => {
 
         const userId = req.params.userId;
         console.log(userId);
-
-        // Fetch bookings -m
-        const userBookings = await bookingsCollection.find({ userId: userId }).toArray();
-
+        const history = req.query.history === 'true';
+        console.log(history);
+        let query = {
+            userId: userId,
+            status: { $in: ['Pending', 'Confirmed'] }
+        }
+        if (history){
+            query.status = 'Completed';
+        }
+        console.log(query);
+        const userBookings = await bookingsCollection.find(query).toArray();
+        const bookingHistory = await bookingsCollection.find({ status: 'Completed' }).toArray();
         if (!userBookings.length) {
             return res.status(404).json({ message: 'No bookings found for this user.' });
         }
@@ -23,8 +31,8 @@ const getUserBookings = async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: 'Error fetching user bookings' });
     }
-
 };
+
 // fetch all cars booked by a user -m
 const getUserBookedCars = async (req, res) => {
     try {
@@ -83,20 +91,20 @@ const getFreeCarsForSearchResult = async (req, res) => {
             const query2 = {
                 $and: [
                     { "agency_id": car.agency_id },
-                    { "dropoffDate": { $lt: new_date }}
+                    { "dropoffDate": { $lt: new_date } }
                 ]
             };
             const cars1 = await carsCollection.find(query1).toArray();
             const carsId = await bookingsCollection.find(query2).project({ "carId": 1 }).toArray();
             total = [...total, ...cars1]
 
-            carsId.map(async(info) => {
-                const car2 = await carsCollection.find({_id: new ObjectId(info.carId)}).toArray();
+            carsId.map(async (info) => {
+                const car2 = await carsCollection.find({ _id: new ObjectId(info.carId) }).toArray();
                 total = [...total, ...car2];
             })
         }))
         console.log(total);
-        
+
         res.send(total)
     }
     catch (error) {
