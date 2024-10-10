@@ -4,18 +4,17 @@ const { ObjectId } = require('mongodb');
 // Create a car review -m
 const createCarReview = async (req, res) => {
     try {
+        console.log("mk car review");
         const db = await connectDB();
-        const carReviewsCollection = db.collection('carReviews');
+        const carReviewsCollection = db.collection('reviews');
 
-        const { carId, userName, userImage, review, rating, agencyResponse } = req.body;
-
+        const {userId, carId, userName, userImage, review, rating, agencyResponse } = req.body;
+        // console.log(req.body);
         // Check if required fields are present
-        if (!carId || !userId || !review || !rating || !car_rent_date_from || !car_rent_date_to) {
-            return res.status(400).json({ message: "All fields are required." });
-        }
-
+    
         const newReview = {
-            carId: new ObjectId(carId),
+            userId,
+            carId,
             review,
             rating,
             userName,
@@ -23,11 +22,11 @@ const createCarReview = async (req, res) => {
             agencyResponse,
             date: new Date()
         };
-
+        console.log(newReview);
         // Insert new review -m
         await carReviewsCollection.insertOne(newReview);
 
-        res.status(201).send({ message: "Review created successfully." });
+        res.status(200).send({ message: "Review created successfully." });
     } catch (error) {
         res.status(500).send({ message: 'Error creating review' });
     }
