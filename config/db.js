@@ -13,7 +13,7 @@ const connectDB = async () => {
                 deprecationErrors: true,
             }
         });
-        
+
         await client.connect();
         const db = client.db('GoWheels');
         console.log('MongoDB connected');
