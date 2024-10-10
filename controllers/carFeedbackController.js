@@ -88,7 +88,6 @@ const updateCarReview = async (req, res) => {
         // console.log(reviewId);
         const { review, rating, agencyResponse } = req.body;
         // console.log(req.body);
-        // Check if review or rating are missing
         if (!review || !rating) {
             return res.status(400).json({ message: "Review and rating are required." });
         }
@@ -101,10 +100,10 @@ const updateCarReview = async (req, res) => {
             date: new Date(), 
         };
         console.log(updatedReview);
-        // Update the review in the database
+     
         const result = await carReviewsCollection.updateOne(
-            { _id: new ObjectId(reviewId) }, // Find review by ID
-            { $set: updatedReview } // Update with the new review data
+            { _id: new ObjectId(reviewId) }, 
+            { $set: updatedReview } 
         );
 
         if (result.matchedCount === 0) {
