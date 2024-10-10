@@ -12,4 +12,4 @@ const showReviewsAndRatings = async(req, res) => {
     }
 }
 
-module.exports = {showReviewsAndRatings}
+module.exports = {showReviewsAndRatings}                  
