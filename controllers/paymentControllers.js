@@ -95,6 +95,7 @@ const paymentSuccess = async (req, res) => {
             }
         })
         if (result.modifiedCount > 0) {
+            console.log("redirect")
             res.redirect(`http://localhost:5173/payment/success/${req.params.tranId}`)
         }
 
