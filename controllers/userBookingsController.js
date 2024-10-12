@@ -10,9 +10,7 @@ const getUserBookings = async (req, res) => {
         console.log("booking collection");
 
         const userId = req.params.userId;
-        console.log(userId);
         const history = req.query.history === 'true';
-        console.log(history);
         let query = {
             userId: userId,
             status: { $in: ['Pending', 'Confirmed'] }
@@ -20,7 +18,6 @@ const getUserBookings = async (req, res) => {
         if (history){
             query.status = 'Completed';
         }
-        console.log(query);
         const userBookings = await bookingsCollection.find(query).toArray();
         const bookingHistory = await bookingsCollection.find({ status: 'Completed' }).toArray();
         if (!userBookings.length) {
@@ -39,11 +36,8 @@ const getUserBookedCars = async (req, res) => {
         const db = await connectDB();
         const bookingsCollection = db.collection('bookings');
         const carsCollection = db.collection('vehiclesData');
-        console.log("booking car collection");
         const userId = req.params.userId;
-        console.log(userId);
-
-        // Fetch bookings for the given userId -m
+    // Fetch bookings for the given userId -m
         const userBookings = await bookingsCollection.find({ userId: userId }).toArray();
         // console.log(userBookings); -m
         if (!userBookings.length) {
@@ -103,8 +97,6 @@ const getFreeCarsForSearchResult = async (req, res) => {
                 total = [...total, ...car2];
             })
         }))
-        console.log(total);
-
         res.send(total)
     }
     catch (error) {
