@@ -14,8 +14,10 @@ const Router = express.Router();
 Router.get("/agency", showAgency);
 Router.get("/agency/:agencyId", getAgency);
 Router.post("/agencyInfo", agencyInfo);
-Router.get("/agency/owner/:email", agencyOwnerInfo);
-Router.patch("/agency/updateAgencyOwnerInfo/:email", updateAgencyOwnerInfo);
+// Router.get("/agency/owner/:email", agencyOwnerInfo);
+Router.get("/user/:email", agencyOwnerInfo);
+
+Router.patch("/updateUserInfo/:email", updateAgencyOwnerInfo);
 Router.post("/agency/addVehicle", addVehicleByAgency);
 Router.get("/agency/vehicleInfo/:email", getVehicleInfo);
 

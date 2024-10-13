@@ -174,8 +174,28 @@ const getVehicleInfo = async (req, res) => {
   try {
     const db = await connectDB();
     const collection = db.collection("vehiclesData");
+    const userEmail = req.params.userEmail;
+    const query = { "agencyInfo.userEmail": userEmail };
+
+    const vehicleInfo = await collection.find(query).toArray();
+    if (!vehicleInfo) {
+      return res.status(404).send("Vehicle info not found");
+    }
+    res.send(vehicleInfo);
+  } catch (error) {
+    console.error("Error getting vehicle data:", error);
+    res.status(500).send("Error getting vehicle data. Please try again later.");
+  }
+};
+
+
+// GET THE BOOKING HISTORY FOR THAT AGENCY USER
+const getBookingHistory = async (req, res) => {
+  try {
+    const db = await connectDB();
+    const collection = db.collection("bookings");
     const email = req.params.email;
-    const query = { "agencyInfo.email": email };
+    const query = { agency_id: agency_id };
 
     const vehicleInfo = await collection.find(query).toArray();
     if (!vehicleInfo) {
