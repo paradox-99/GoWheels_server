@@ -6,12 +6,8 @@ const getUserBookings = async (req, res) => {
     try {
         const db = await connectDB();
         const bookingsCollection = db.collection('bookings');
-        console.log("booking collection");
-
         const userId = req.params.userId;
-        console.log(userId);
         const history = req.query.history === 'true';
-        console.log(history);
         let query = {
             userId: userId,
             status: { $in: ['Pending', 'Confirmed'] }
@@ -19,7 +15,6 @@ const getUserBookings = async (req, res) => {
         if (history){
             query.status = { $in: ['Completed', 'Cancelled'] }
         }
-        console.log(query);
         const userBookings = await bookingsCollection.find(query).toArray();
         if (!userBookings.length) {
             console.log("TEST");
@@ -38,13 +33,11 @@ const getUserBookedCars = async (req, res) => {
         const db = await connectDB();
         const bookingsCollection = db.collection('bookings');
         const carsCollection = db.collection('vehiclesData');
-        console.log("booking car collection");
         const userId = req.params.userId;
-        console.log(userId);
 
         //  bookings for the given userId -m
         const userBookings = await bookingsCollection.find({ userId: userId }).toArray();
-        // console.log(userBookings); -m
+        
         if (!userBookings.length) {
             console.log("TEST");
             return res.send({ message: 'No bookings found for this user.' });
@@ -128,7 +121,6 @@ const getFreeCarsForSearchResult = async (req, res) => {
                 total = [...total, ...car2];
             })
         }))
-        console.log(total);
 
         res.send(total)
     }

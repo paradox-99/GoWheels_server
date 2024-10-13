@@ -20,10 +20,8 @@ const order = async (req, res) => {
 
 
         const product = await collection.findOne({ _id: new ObjectId(req.body.productId) })
-        // console.log(product.totalPrice)
 
-        const order = req.body
-        // console.log(order)
+        const order = req.body;
 
 
         const data = {
@@ -57,8 +55,6 @@ const order = async (req, res) => {
             ship_country: 'Bangladesh',
         };
 
-        console.log(data)
-
 
         const sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live)
         sslcz.init(data).then(apiResponse => {
@@ -72,9 +68,6 @@ const order = async (req, res) => {
             }
 
             const result = paymentCollection.insertOne(finalOrder)
-
-            console.log("Redirection to : ", GatewayPageURL)
-
         });
 
     }
@@ -87,7 +80,6 @@ const paymentSuccess = async (req, res) => {
     try {
         const db = await connectDB()
         const paymentCollection = db.collection('payment')
-        console.log("trajection id : ", req.params.tranId)
 
         const result = await paymentCollection.updateOne({ tranjectionId: req.params.tranId }, {
             $set: {
@@ -95,7 +87,6 @@ const paymentSuccess = async (req, res) => {
             }
         })
         if (result.modifiedCount > 0) {
-            console.log("redirect")
             res.redirect(`http://localhost:5173/payment/success/${req.params.tranId}`)
         }
 
