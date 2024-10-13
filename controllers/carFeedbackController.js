@@ -97,13 +97,13 @@ const updateCarReview = async (req, res) => {
             review,
             rating,
             agencyResponse,
-            date: new Date(), 
+            date: new Date(),
         };
         console.log(updatedReview);
-     
+
         const result = await carReviewsCollection.updateOne(
-            { _id: new ObjectId(reviewId) }, 
-            { $set: updatedReview } 
+            { _id: new ObjectId(reviewId) },
+            { $set: updatedReview }
         );
 
         if (result.matchedCount === 0) {

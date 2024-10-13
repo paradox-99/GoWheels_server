@@ -2,7 +2,6 @@ const connectDB = require("../config/db");
 const { ObjectId } = require('mongodb');
 
 
-// fetch bookings collection by user with status Pending and Confirmed -m
 const getUserBookings = async (req, res) => {
     try {
         const db = await connectDB();
@@ -18,11 +17,10 @@ const getUserBookings = async (req, res) => {
             status: { $in: ['Pending', 'Confirmed'] }
         }
         if (history){
-            query.status = 'Completed';
+            query.status = { $in: ['Completed', 'Cancelled'] }
         }
         console.log(query);
         const userBookings = await bookingsCollection.find(query).toArray();
-        const bookingHistory = await bookingsCollection.find({ status: 'Completed' }).toArray();
         if (!userBookings.length) {
             console.log("TEST");
             return res.send({ message: 'Ohoo! You do not have any bookings 😌' });
@@ -34,7 +32,7 @@ const getUserBookings = async (req, res) => {
     }
 };
 
-// fetch all cars booked by a user -m
+//  all cars booked by a user -m
 const getUserBookedCars = async (req, res) => {
     try {
         const db = await connectDB();
@@ -44,7 +42,7 @@ const getUserBookedCars = async (req, res) => {
         const userId = req.params.userId;
         console.log(userId);
 
-        // Fetch bookings for the given userId -m
+        //  bookings for the given userId -m
         const userBookings = await bookingsCollection.find({ userId: userId }).toArray();
         // console.log(userBookings); -m
         if (!userBookings.length) {
@@ -54,7 +52,7 @@ const getUserBookedCars = async (req, res) => {
 
         const carIds = userBookings.map(booking => new ObjectId(booking.carId));
         // console.log(carIds); -m
-        // Fetch car details -m
+        //  car details -m
         const bookedCars = await carsCollection.find({ _id: { $in: carIds } }).toArray();
 
         res.status(200).json({ bookedCars });
@@ -62,6 +60,31 @@ const getUserBookedCars = async (req, res) => {
         res.status(500).json({ message: 'Error fetching booked cars' });
     }
 };
+
+const getFavoriteCars = async (req, res) => {
+    try {
+        const db = await connectDB();
+        const carsCollection = db.collection('vehiclesData');
+        const { ids } = req.body; 
+        console.log(req.body);
+        console.log("test favorite");
+        if (!ids || !ids.length) {
+            return res.status(400).json({ message: 'No favorite cars provided.' });
+        }
+
+        const carObjectIds = ids.map(carId => new ObjectId(carId));
+        const favoriteCars = await carsCollection.find({ _id: { $in: carObjectIds } }).toArray();
+
+        if (!favoriteCars.length) {
+            return res.status(404).json({ message: 'No favorite cars found.' });
+        }
+
+        res.status(200).json(favoriteCars);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching favorite cars' });
+    }
+};
+
 
 const getFreeCarsForSearchResult = async (req, res) => {
     try {
@@ -114,4 +137,4 @@ const getFreeCarsForSearchResult = async (req, res) => {
     }
 }
 
-module.exports = { getUserBookedCars, getUserBookings, getFreeCarsForSearchResult };
+module.exports = { getUserBookedCars, getUserBookings, getFavoriteCars, getFreeCarsForSearchResult };
