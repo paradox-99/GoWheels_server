@@ -1,4 +1,5 @@
 const connectDB = require("../config/db")
+const { ObjectId } = require('mongodb');
 
 const showUsers = async (req, res) => {
     try {
@@ -17,7 +18,7 @@ const getUser = async (req, res) => {
         const db = await connectDB();
         const collection = db.collection('users');
         const email = req.params.email;
-        const query = { userEmail: email }
+        const query = { "userEmail": email }
         const user = await collection.findOne(query);
         res.send(user);
     }
@@ -42,19 +43,18 @@ const insertUser = async (req, res) => {
     try {
         const db = await connectDB();
         const collection = db.collection('users');
-
         const user = req.body;
+        const query = { userEmail: user?.userEmail };
         const options = {
             ...user,
             userRole: 'user',
             accountStatus: 'not verified',
+            drivingLisence: 'unavailable',
         }
-        const query = { userEmail: user?.userEmail };
         const existUser = await collection.findOne(query);
         if (existUser) {
             return res.send({ message: "user already exists", insertedId: null });
         }
-
         const result = await collection.insertOne(options);
         res.send(result);
     }
@@ -114,8 +114,8 @@ const replaceData = async (req, res) => {
             ...info,
             userRole: 'user',
             accountStatus: 'not verified',
+            drivingLisence: 'unavailable',
         }
-
         const existUser = await collection.findOne(query);
         if (!existUser) {
             return res.send({ message: "This user info is not available", insertedId: null });
@@ -128,4 +128,40 @@ const replaceData = async (req, res) => {
     }
 }
 
-module.exports = { showUsers, getUser, insertUser, updateOne, addOne, replaceData, ownerInfo }
+
+
+
+// Update user role by admin
+const updateRole = async (req, res) => {
+    const id = req.params.id;  // Get user ID from the URL params
+    const { newRole } = req.body;
+    const db = await connectDB();
+    const collection = db.collection('users');  // Get the new role from the request body
+
+    if (!newRole) {
+        return res.status(400).send({ message: 'New role is required' });
+    }
+
+    const filter = { _id: new ObjectId(id) };  // Find the user by ID
+    const updateDoc = {
+        $set: { userRole: newRole }  // Set the new role
+    };
+
+    try {
+        const result = await collection.updateOne(filter, updateDoc);  // Update the role in the database
+        if (result.modifiedCount === 1) {
+            res.send({ message: 'Role updated successfully' });
+        } else {
+            res.status(404).send({ message: 'User not found' });
+        }
+    } catch (error) {
+        console.error("Error updating user role:", error);
+        res.status(500).send({ message: 'Internal server error' });
+    }
+};
+
+// Export the updateRole function
+module.exports = { updateRole };
+
+
+module.exports = { showUsers, getUser, insertUser, updateOne, addOne, replaceData, ownerInfo, updateRole }

@@ -7,8 +7,6 @@ const getUserBookings = async (req, res) => {
     try {
         const db = await connectDB();
         const bookingsCollection = db.collection('bookings');
-        console.log("booking collection");
-
         const userId = req.params.userId;
         const history = req.query.history === 'true';
         let query = {
@@ -21,7 +19,8 @@ const getUserBookings = async (req, res) => {
         const userBookings = await bookingsCollection.find(query).toArray();
         const bookingHistory = await bookingsCollection.find({ status: 'Completed' }).toArray();
         if (!userBookings.length) {
-            return res.status(404).json({ message: 'No bookings found for this user.' });
+            console.log("TEST");
+            return res.send({ message: 'Ohoo! You do not have any bookings 😌' });
         }
 
         res.status(200).json({ userBookings });
@@ -39,13 +38,14 @@ const getUserBookedCars = async (req, res) => {
         const userId = req.params.userId;
     // Fetch bookings for the given userId -m
         const userBookings = await bookingsCollection.find({ userId: userId }).toArray();
-        // console.log(userBookings); -m
+        
         if (!userBookings.length) {
-            return res.status(404).json({ message: 'No bookings found for this user.' });
+            console.log("TEST");
+            return res.send({ message: 'No bookings found for this user.' });
         }
 
         const carIds = userBookings.map(booking => new ObjectId(booking.carId));
-        // console.log(carIds); -m
+
         // Fetch car details -m
         const bookedCars = await carsCollection.find({ _id: { $in: carIds } }).toArray();
 
