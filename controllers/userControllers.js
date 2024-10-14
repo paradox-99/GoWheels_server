@@ -39,6 +39,34 @@ const ownerInfo = async (req, res) => {
     }
 };
 
+const checkUser = async (req, res) => {
+    try {
+        const db = await connectDB();
+        const collection = db.collection('users');
+        const { phone, nid } = req.query;
+        let phoneExists = false;
+        let nidExists = false;
+
+        const phoneCheck = await collection.findOne({ "phone": phone });
+        const nidCheck = await collection.findOne({ "nid": nid });
+
+      if(phoneCheck){
+        phoneExists = true
+      }
+
+      if(nidCheck){
+        nidExists = true
+      }
+        res.json({
+            phoneExists,
+            nidExists
+        });
+    } catch (error) {
+        console.error('Error checking user existence', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+}
+
 const insertUser = async (req, res) => {
     try {
         const db = await connectDB();
@@ -128,10 +156,6 @@ const replaceData = async (req, res) => {
     }
 }
 
-
-
-
-// Update user role by admin
 const updateRole = async (req, res) => {
     const id = req.params.id;  // Get user ID from the URL params
     const { newRole } = req.body;
@@ -164,4 +188,4 @@ const updateRole = async (req, res) => {
 module.exports = { updateRole };
 
 
-module.exports = { showUsers, getUser, insertUser, updateOne, addOne, replaceData, ownerInfo, updateRole }
+module.exports = { showUsers, getUser, insertUser, updateOne, addOne, replaceData, ownerInfo, updateRole, checkUser }
