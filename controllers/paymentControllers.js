@@ -18,7 +18,7 @@ const order = async (req, res) => {
         const paymentCollection = db.collection('payment')
 
         const order = req.body
-        // console.log("order : ", order?.totalRentHours)
+        // console.log("order : ", order)
 
         const car = await collection.findOne({ _id: new ObjectId(req.body.carId) })
         // console.log("car : ", car?.vehicle_info?.rental_price)
@@ -28,7 +28,7 @@ const order = async (req, res) => {
         const totalCost = order?.totalRentHours * car?.vehicle_info?.rental_price / 24;
         const absoluteTotalCost = Math.ceil(totalCost);
 
-        if (order?.method === 'self-driving') {
+        if (order?.method === 'Self-driving') {
 
             const initialData = {
                 store_id: "gowhe6703a1593988b",
