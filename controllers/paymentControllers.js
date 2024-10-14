@@ -1,81 +1,147 @@
 const connectDB = require("../config/db")
 const { ObjectId } = require('mongodb')
 
-const SSLCommerzPayment = require('sslcommerz-lts')
-
 const dotenv = require('dotenv');
+const { default: axios } = require("axios");
 dotenv.config();
 
-const store_id = 'gowhe6703a1593988b'
-const store_passwd = 'gowhe6703a1593988b@ssl'
-const is_live = false //true for live, false for sandbox
+// const store_id = process.env.SSL_Store_ID
+// const store_passwd = process.env.SSL_Store_Password
+// const is_live = false //true for live, false for sandbox
 
 const tran_id = new ObjectId().toString()
 
 const order = async (req, res) => {
     try {
         const db = await connectDB()
-        const collection = db.collection('bookings')
+        const collection = db.collection('vehiclesData')
         const paymentCollection = db.collection('payment')
 
-
-        const product = await collection.findOne({ _id: new ObjectId(req.body.productId) })
-        // console.log(product.totalPrice)
-
         const order = req.body
-        // console.log(order)
+        // console.log("order : ", order?.totalRentHours)
 
+        const car = await collection.findOne({ _id: new ObjectId(req.body.carId) })
+        // console.log("car : ", car?.vehicle_info?.rental_price)
 
-        const data = {
-            total_amount: product?.totalPrice,
-            currency: "BDT",
-            tran_id: tran_id, // use unique tran_id for each api call
-            success_url: `http://localhost:3000/api/payment/success/${tran_id}`,
-            fail_url: `http://localhost:3000/api/payment/fail/${tran_id}`,
-            cancel_url: 'http://localhost:3030/cancel',
-            ipn_url: 'http://localhost:3030/ipn',
-            shipping_method: 'Courier',
-            product_name: 'Computer.',
-            product_category: 'Electronic',
-            product_profile: 'general',
-            cus_name: order?.cus_name,
-            cus_email: 'customer@example.com',
-            cus_add1: order?.address,
-            cus_add2: 'Dhaka',
-            cus_city: 'Dhaka',
-            cus_state: 'Dhaka',
-            cus_postcode: '1000',
-            cus_country: 'Bangladesh',
-            cus_phone: '01711111111',
-            cus_fax: '01711111111',
-            ship_name: 'Customer Name',
-            ship_add1: 'Dhaka',
-            ship_add2: 'Dhaka',
-            ship_city: 'Dhaka',
-            ship_state: 'Dhaka',
-            ship_postcode: 1000,
-            ship_country: 'Bangladesh',
-        };
+        // price
 
-        console.log(data)
+        const totalCost = order?.totalRentHours * car?.vehicle_info?.rental_price / 24;
+        const absoluteTotalCost = Math.ceil(totalCost);
 
+        if (order?.method === 'self-driving') {
 
-        const sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live)
-        sslcz.init(data).then(apiResponse => {
-            // Redirect the user to payment gateway
-            let GatewayPageURL = apiResponse.GatewayPageURL
-            res.send({ url: GatewayPageURL })
+            const initialData = {
+                store_id: "gowhe6703a1593988b",
+                store_passwd: "gowhe6703a1593988b@ssl",
+                total_amount: absoluteTotalCost,
+                currency: "BDT",
+                tran_id: tran_id, // use unique tran_id for each api call
+                success_url: `http://localhost:3000/api/payment/success/${tran_id}`,
+                fail_url: `http://localhost:3000/api/payment/fail/${tran_id}`,
+                cancel_url: 'http://localhost:3030/cancel',
+                ipn_url: 'http://localhost:3030/ipn',
+                shipping_method: 'Courier',
+                car_name: 'Computer.',
+                car_category: 'Electronic',
+                car_profile: 'general',
+                cus_name: "cus_name",
+                cus_email: 'customer@example.com',
+                cus_add1: "cus_address",
+                cus_add2: 'Dhaka',
+                cus_city: 'Dhaka',
+                cus_state: 'Dhaka',
+                cus_postcode: '1000',
+                cus_country: 'Bangladesh',
+                cus_phone: '01711111111',
+                cus_fax: '01711111111',
+                ship_name: 'Customer Name',
+                ship_add1: 'Dhaka',
+                ship_add2: 'Dhaka',
+                ship_city: 'Dhaka',
+                ship_state: 'Dhaka',
+                ship_postcode: 1000,
+                ship_country: 'Bangladesh',
+                product_name: "product_name",
+                product_category: "product_category",
+                product_profile: "product_profile"
+            };
 
+            console.log(initialData)
+
+            const response = await axios({
+                method: "POST",
+                url: "https://sandbox.sslcommerz.com/gwprocess/v4/api.php",
+                data: initialData,
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                }
+            })
+
+            console.log("response : ", response?.data?.GatewayPageURL)
+            res.send({ url: response?.data?.GatewayPageURL })
 
             const finalOrder = {
-                product, paidStatus: false, tranjectionId: tran_id, 
+                car, paidStatus: false, tranjectionId: tran_id,
             }
 
             const result = paymentCollection.insertOne(finalOrder)
 
-            console.log("Redirection to : ", GatewayPageURL)
+        }
+        // else if (order.method === "driver") {
 
-        });
+        // }
+
+
+        // const data = {
+        //     total_amount: car?.totalPrice,
+        //     currency: "BDT",
+        //     tran_id: tran_id, // use unique tran_id for each api call
+        //     success_url: `http://localhost:3000/api/payment/success/${tran_id}`,
+        //     fail_url: `http://localhost:3000/api/payment/fail/${tran_id}`,
+        //     cancel_url: 'http://localhost:3030/cancel',
+        //     ipn_url: 'http://localhost:3030/ipn',
+        //     shipping_method: 'Courier',
+        //     car_name: 'Computer.',
+        //     car_category: 'Electronic',
+        //     car_profile: 'general',
+        //     cus_name: order?.cus_name,
+        //     cus_email: 'customer@example.com',
+        //     cus_add1: order?.address,
+        //     cus_add2: 'Dhaka',
+        //     cus_city: 'Dhaka',
+        //     cus_state: 'Dhaka',
+        //     cus_postcode: '1000',
+        //     cus_country: 'Bangladesh',
+        //     cus_phone: '01711111111',
+        //     cus_fax: '01711111111',
+        //     ship_name: 'Customer Name',
+        //     ship_add1: 'Dhaka',
+        //     ship_add2: 'Dhaka',
+        //     ship_city: 'Dhaka',
+        //     ship_state: 'Dhaka',
+        //     ship_postcode: 1000,
+        //     ship_country: 'Bangladesh',
+        // };
+
+        // console.log(data)
+
+
+        // const sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live)
+        // sslcz.init(data).then(apiResponse => {
+        //     // Redirect the user to payment gateway
+        //     let GatewayPageURL = apiResponse.GatewayPageURL
+        //     res.send({ url: GatewayPageURL })
+
+
+        //     const finalOrder = {
+        //         car, paidStatus: false, tranjectionId: tran_id, 
+        //     }
+
+        //     const result = paymentCollection.insertOne(finalOrder)
+
+        //     console.log("Redirection to : ", GatewayPageURL)
+
+        // });
 
     }
     catch (error) {
@@ -112,7 +178,7 @@ const paymentFail = async (req, res) => {
 
         const result = await paymentCollection.deleteOne({ tranjectionId: req.params.tranId })
 
-        if(result.deletedCount){
+        if (result.deletedCount) {
             res.redirect(`http://localhost:5173/payment/fail/${req.params.tranId}`)
         }
 
