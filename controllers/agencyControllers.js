@@ -66,25 +66,45 @@ const agencyOwnerInfo = async (req, res) => {
 
 // UPDATE AGENCY
 const updateAgencyOwnerInfo = async (req, res) => {
-  try {
-    const db = await connectDB();
-    const collection = db.collection("users");
-    const email = req.params.email;
-    const updatedData = req.body;
-    const query = { userEmail: email };
-    const updateDoc = {
-      $set: updatedData,
-    };
-    const result = await collection.updateOne(query, updateDoc);
-    console.log(updateDoc);
-    if (result.modifiedCount === 0) {
-      return res.status(404).send("User not found or no changes made");
+    try {
+        const db = await connectDB();
+        const collection = db.collection("users");
+        const email = req.params.email;
+  
+        // Extract fields from request body
+        const { firstName, lastName, phone, gender, image, division, district, upazilla, nid, dateOfBirth } = req.body;
+  
+        // Build the update document with dot notation for nested fields
+        const updateDoc = {
+            $set: {
+                ...(firstName && { firstName }),
+                ...(lastName && { lastName }),
+                ...(phone && { phone }),
+                ...(nid && { nid }),
+                ...(dateOfBirth && { dateOfBirth }),
+                ...(gender && { gender }),        // Ensure these are included
+                ...(image && { image }),          // Ensure these are included
+                ...(division && { "userAddress.division": division }),
+                ...(district && { "userAddress.district": district }),
+                ...(upazilla && { "userAddress.upazilla": upazilla }),
+            },
+        };
+  
+        const query = { userEmail: email };
+  
+        // Perform the update
+        const result = await collection.updateOne(query, updateDoc);
+  
+        if (result.modifiedCount === 0) {
+            return res.status(404).send("User not found or no changes made");
+        }
+  
+        res.status(200).send("User updated successfully");
+    } catch (error) {
+        res.status(500).send("Error updating user: " + error.message);
     }
-    res.status(200).send("User updated successfully");
-  } catch (error) {
-    res.status(500).send("Error updating user: " + error.message);
-  }
 };
+
 
 // ADD VEHICLE FROM AGENCY OWNER DASHBOARD
 // const addVehicleByAgency = async (req, res) => {
