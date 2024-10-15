@@ -5,13 +5,19 @@ const showUsers = async (req, res) => {
     try {
         const db = await connectDB();
         const collection = db.collection('users');
-        const users = await collection.find().toArray();
+        const { search } = req.query;
+        const query = search ? {
+            firstName: { $regex: search, $options: 'i' },
+        } : {};
+
+        const users = await collection.find(query).toArray();
         res.send(users);
-    }
-    catch (error) {
+    } catch (error) {
+        console.error(error);
         res.status(500).send('Error retrieving users');
     }
 }
+
 
 const getUser = async (req, res) => {
     try {
@@ -161,8 +167,48 @@ const updateRole = async (req, res) => {
     }
 };
 
-// Export the updateRole function
-module.exports = { updateRole };
+
+const deleteUser = async (req, res) => {
+    const db = await connectDB();
+    const collection = db.collection('users');
+    const { id } = req.params;
+
+    // Check if the id is a valid ObjectId
+    if (!ObjectId.isValid(id)) {
+        return res.status(400).send({ message: 'Invalid agency ID' });
+    }
+
+    try {
+        const result = await collection.deleteOne({ _id: new ObjectId(id) });
+
+        if (result.deletedCount === 1) {
+            res.status(200).send({ message: 'user deleted successfully' });
+        } else {
+            res.status(404).send({ message: 'user not found' });
+        }
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        res.status(500).send({ message: 'Error deleting user', error });
+    }
+};
+
+const getModerators = async (req, res) => {
+    try {
+        const db = await connectDB();
+        const collection = db.collection('users');
+
+        // Find all users with role "moderator"
+        const moderators = await collection.find({ userRole: 'moderator' }).toArray();
+
+        res.status(200).json(moderators);
+    } catch (error) {
+        console.error("Error fetching moderators: ", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
 
 
-module.exports = { showUsers, getUser, insertUser, updateOne, addOne, replaceData, ownerInfo, updateRole }
+ 
+
+
+module.exports = { showUsers, getUser, insertUser, updateOne, addOne, replaceData, ownerInfo, updateRole, deleteUser, getModerators }
