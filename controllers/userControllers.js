@@ -1,5 +1,7 @@
 const connectDB = require("../config/db")
 const { ObjectId } = require('mongodb');
+const { generateAndStoreOTP } = require('../config/otpService');
+const { sendOTPEmail } = require('../config/nodeMialer');
 
 const showUsers = async (req, res) => {
     try {
@@ -67,6 +69,7 @@ const insertUser = async (req, res) => {
             ...user,
             userRole: 'user',
             accountStatus: 'not verified',
+            drivingLicense: 'unavailable'
         }
         const query = { userEmail: user?.userEmail };
         const existUser = await collection.findOne(query);
@@ -75,10 +78,15 @@ const insertUser = async (req, res) => {
         }
 
         const result = await collection.insertOne(options);
-        res.send(result);
+        if (result.insertedId) {
+            const otp = await generateAndStoreOTP(user?.userEmail);
+            await sendOTPEmail(user?.userEmail, otp)
+            return res.send(result);
+        }
+
     }
     catch (error) {
-        res.status(500).send('Error retrieving user');
+       return res.status(500).send('Error retrieving user');
     }
 }
 
@@ -187,6 +195,7 @@ const replaceData = async (req, res) => {
             ...info,
             userRole: 'user',
             accountStatus: 'not verified',
+            drivingLicense: 'unavailable'
         }
         const existUser = await collection.findOne(query);
         if (!existUser) {
