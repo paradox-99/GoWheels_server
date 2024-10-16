@@ -127,6 +127,32 @@ const updateOne = async (req, res) => {
     }
 }
 
+const updateStatus = async (req, res) => {
+
+    const email = req.params.email;
+    const { accountStatus } = req.body;
+
+    try {
+        const db = await connectDB();
+        const collection = db.collection('users');
+
+        const result = await collection.updateOne(
+            { userEmail: email },
+            { $set: { accountStatus } }
+        );
+
+        if (result.modifiedCount > 0) {
+            return res.send(result);
+        } else {
+            return res.status(404).send({ message: "User not found or no changes made." });
+        }
+    }
+    catch (error) {
+        console.log(error)
+        res.status(500).send("Server error while updating account status.");
+    }
+}
+
 const addOne = async (req, res) => {
     try {
         const db = await connectDB();
@@ -205,4 +231,4 @@ const updateRole = async (req, res) => {
     }
 };
 
-module.exports = { showUsers, getUser, insertUser, updateOne, addOne, replaceData, ownerInfo, updateRole, checkUser }
+module.exports = { showUsers, getUser, insertUser, updateOne, addOne, replaceData, ownerInfo, updateRole, checkUser, updateStatus }
