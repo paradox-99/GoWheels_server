@@ -18,7 +18,6 @@ const showUsers = async (req, res) => {
     }
 }
 
-
 const getUser = async (req, res) => {
     try {
         const db = await connectDB();
@@ -54,7 +53,7 @@ const driverInfo = async (req, res) => {
         const result = await collection.insertOne(ownerData);
         res.status(201).json({ message: 'Data inserted successfully', result });
     } catch (error) {
-        res.status(500).json({ message: 'Error inserting data', error }); 
+        res.status(500).json({ message: 'Error inserting data', error });
     }
 };
 
@@ -83,6 +82,34 @@ const insertUser = async (req, res) => {
     }
 }
 
+const checkUser = async (req, res) => {
+    try {
+        const db = await connectDB();
+        const collection = db.collection('users');
+        const { phone, nid } = req.query;
+        let phoneExists = false;
+        let nidExists = false;
+
+        const phoneCheck = await collection.findOne({ "phone": phone });
+        const nidCheck = await collection.findOne({ "nid": nid });
+
+        if (phoneCheck) {
+            phoneExists = true
+        }
+
+        if (nidCheck) {
+            nidExists = true
+        }
+        res.json({
+            phoneExists,
+            nidExists
+        });
+    } catch (error) {
+        console.error('Error checking user existence', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+}
+
 const updateOne = async (req, res) => {
     try {
         const db = await connectDB();
@@ -99,6 +126,32 @@ const updateOne = async (req, res) => {
     }
     catch (error) {
         res.status(500).send('Error retrieving user');
+    }
+}
+
+const updateStatus = async (req, res) => {
+
+    const email = req.params.email;
+    const { accountStatus } = req.body;
+
+    try {
+        const db = await connectDB();
+        const collection = db.collection('users');
+
+        const result = await collection.updateOne(
+            { userEmail: email },
+            { $set: { accountStatus } }
+        );
+
+        if (result.modifiedCount > 0) {
+            return res.send(result);
+        } else {
+            return res.status(404).send({ message: "User not found or no changes made." });
+        }
+    }
+    catch (error) {
+        console.log(error)
+        res.status(500).send("Server error while updating account status.");
     }
 }
 
@@ -148,26 +201,23 @@ const replaceData = async (req, res) => {
 }
 
 
-
-
-// Update user role by admin
 const updateRole = async (req, res) => {
-    const id = req.params.id;  // Get user ID from the URL params
+    const id = req.params.id;
     const { newRole } = req.body;
     const db = await connectDB();
-    const collection = db.collection('users');  // Get the new role from the request body
+    const collection = db.collection('users');
 
     if (!newRole) {
         return res.status(400).send({ message: 'New role is required' });
     }
 
-    const filter = { _id: new ObjectId(id) };  // Find the user by ID
+    const filter = { _id: new ObjectId(id) };
     const updateDoc = {
-        $set: { userRole: newRole }  // Set the new role
+        $set: { userRole: newRole }
     };
 
     try {
-        const result = await collection.updateOne(filter, updateDoc);  // Update the role in the database
+        const result = await collection.updateOne(filter, updateDoc);
         if (result.modifiedCount === 1) {
             res.send({ message: 'Role updated successfully' });
         } else {
@@ -179,13 +229,11 @@ const updateRole = async (req, res) => {
     }
 };
 
-
 const deleteUser = async (req, res) => {
     const db = await connectDB();
     const collection = db.collection('users');
     const { id } = req.params;
 
-    // Check if the id is a valid ObjectId
     if (!ObjectId.isValid(id)) {
         return res.status(400).send({ message: 'Invalid agency ID' });
     }
@@ -209,15 +257,13 @@ const getModerators = async (req, res) => {
         const db = await connectDB();
         const collection = db.collection('users');
 
-        // Find all users with role "moderator"
         const moderators = await collection.find({ userRole: 'moderator' }).toArray();
-
         res.status(200).json(moderators);
+
     } catch (error) {
         console.error("Error fetching moderators: ", error);
         res.status(500).json({ message: "Internal server error" });
     }
 };
 
-
-module.exports = { showUsers, getUser, insertUser, updateOne, addOne, replaceData, ownerInfo, updateRole, deleteUser, getModerators,driverInfo }
+module.exports = { showUsers, getUser, insertUser, updateOne, addOne, replaceData, ownerInfo, updateRole, checkUser, updateStatus, driverInfo, deleteUser, getModerators }
