@@ -8,18 +8,22 @@ const reviewsAndRatingsRoute = require('./routes/reviewAndRatingRoutes');
 const agency = require('./routes/agencyRoutes');
 const bookingRoute = require('./routes/userBookingRoutes')
 const payment = require('./routes/payment')
-const feedbacksRoute = require('./routes/feedbackRoute')
+const feedbacksRoute = require('./routes/feedbackRoute');
+const otp = require('./routes/otpRoutes');
+
 
 const app = express();
 
 app.use(cors({
     origin: [
         'http://localhost:5173',
+        'http://localhost:5174',
         'https://gowheels-99.web.app'
     ],
     credentials: true
 }
 ));
+
 app.use(express.json());
 
 app.use('/api/authorization', authRoutes);
@@ -30,5 +34,6 @@ app.use('/api/agencyRoute', agency);
 app.use('/api/bookings', bookingRoute)
 app.use('/api/payment', payment)
 app.use('/api/feedbackRoute', feedbacksRoute)
+app.use('/api/otpRoutes', otp)
 
 module.exports = app;
