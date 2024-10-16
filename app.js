@@ -9,7 +9,7 @@ const agency = require('./routes/agencyRoutes');
 const bookingRoute = require('./routes/userBookingRoutes')
 const payment = require('./routes/payment')
 const feedbacksRoute = require('./routes/feedbackRoute')
-
+const driverRoute = require('./routes/driverRoute')
 const app = express();
 
 app.use(cors({
@@ -33,5 +33,6 @@ app.use('/api/agencyRoute', agency);
 app.use('/api/bookings', bookingRoute)
 app.use('/api/payment', payment)
 app.use('/api/feedbackRoute', feedbacksRoute)
+app.use('/api/driverRoute', driverRoute)
 
 module.exports = app;

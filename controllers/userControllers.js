@@ -46,6 +46,18 @@ const ownerInfo = async (req, res) => {
     }
 };
 
+const driverInfo = async (req, res) => {
+    try {
+        const db = await connectDB();
+        const collection = db.collection('users');
+        const ownerData = req.body;
+        const result = await collection.insertOne(ownerData);
+        res.status(201).json({ message: 'Data inserted successfully', result });
+    } catch (error) {
+        res.status(500).json({ message: 'Error inserting data', error });
+    }
+};
+
 const insertUser = async (req, res) => {
     try {
         const db = await connectDB();
@@ -140,22 +152,22 @@ const replaceData = async (req, res) => {
 
 // Update user role by admin
 const updateRole = async (req, res) => {
-    const id = req.params.id;  // Get user ID from the URL params
+    const id = req.params.id;  
     const { newRole } = req.body;
     const db = await connectDB();
-    const collection = db.collection('users');  // Get the new role from the request body
+    const collection = db.collection('users');  
 
     if (!newRole) {
         return res.status(400).send({ message: 'New role is required' });
     }
 
-    const filter = { _id: new ObjectId(id) };  // Find the user by ID
+    const filter = { _id: new ObjectId(id) };  
     const updateDoc = {
-        $set: { userRole: newRole }  // Set the new role
+        $set: { userRole: newRole }  
     };
 
     try {
-        const result = await collection.updateOne(filter, updateDoc);  // Update the role in the database
+        const result = await collection.updateOne(filter, updateDoc); 
         if (result.modifiedCount === 1) {
             res.send({ message: 'Role updated successfully' });
         } else {
@@ -209,6 +221,4 @@ const getModerators = async (req, res) => {
 
 
  
-
-
-module.exports = { showUsers, getUser, insertUser, updateOne, addOne, replaceData, ownerInfo, updateRole, deleteUser, getModerators }
+module.exports = { showUsers, getUser, insertUser, updateOne, addOne, replaceData, ownerInfo, updateRole, deleteUser, getModerators,driverInfo }
