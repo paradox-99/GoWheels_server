@@ -1,16 +1,19 @@
 const connectDB = require("../config/db")
 const { ObjectId } = require('mongodb');
-const { generateAndStoreOTP } = require('../config/otpService');
-const { sendOTPEmail } = require('../config/nodeMialer');
 
 const showUsers = async (req, res) => {
     try {
         const db = await connectDB();
         const collection = db.collection('users');
-        const users = await collection.find().toArray();
+        const { search } = req.query;
+        const query = search ? {
+            firstName: { $regex: search, $options: 'i' },
+        } : {};
+
+        const users = await collection.find(query).toArray();
         res.send(users);
-    }
-    catch (error) {
+    } catch (error) {
+        console.error(error);
         res.status(500).send('Error retrieving users');
     }
 }
@@ -23,6 +26,7 @@ const getUser = async (req, res) => {
         const query = { "userEmail": email }
         const user = await collection.findOne(query);
         res.send(user);
+
     }
     catch (error) {
         res.status(500).send('Error retrieving user');
@@ -40,6 +44,43 @@ const ownerInfo = async (req, res) => {
         res.status(500).json({ message: 'Error inserting data', error });
     }
 };
+
+const driverInfo = async (req, res) => {
+    try {
+        const db = await connectDB();
+        const collection = db.collection('users');
+        const ownerData = req.body;
+        const result = await collection.insertOne(ownerData);
+        res.status(201).json({ message: 'Data inserted successfully', result });
+    } catch (error) {
+        res.status(500).json({ message: 'Error inserting data', error });
+    }
+};
+
+const insertUser = async (req, res) => {
+    try {
+        const db = await connectDB();
+        const collection = db.collection('users');
+
+        const user = req.body;
+        const options = {
+            ...user,
+            userRole: 'user',
+            accountStatus: 'not verified',
+        }
+        const query = { userEmail: user?.userEmail };
+        const existUser = await collection.findOne(query);
+        if (existUser) {
+            return res.send({ message: "user already exists", insertedId: null });
+        }
+
+        const result = await collection.insertOne(options);
+        res.send(result);
+    }
+    catch (error) {
+        res.status(500).send('Error retrieving user');
+    }
+}
 
 const checkUser = async (req, res) => {
     try {
@@ -66,45 +107,6 @@ const checkUser = async (req, res) => {
     } catch (error) {
         console.error('Error checking user existence', error);
         res.status(500).json({ message: 'Server error' });
-    }
-}
-
-const insertUser = async (req, res) => {
-    try {
-        const db = await connectDB();
-        const collection = db.collection('users');
-
-        const user = req.body;
-        const query = { userEmail: user?.userEmail };
-
-        const currentDate = new Date();
-        const creationDate = currentDate.toISOString().slice(0, 10);
-
-        const options = {
-            ...user,
-            userRole: 'user',
-            accountStatus: 'not verified',
-            drivingLisence: 'unavailable',
-            creationDate: creationDate,
-        }
-
-        const existUser = await collection.findOne(query);
-
-        if (existUser) {
-            return res.send({ message: "user already exists", insertedId: null });
-        }
-
-        const result = await collection.insertOne(options);
-
-        if (result.insertedId) {
-            const otp = await generateAndStoreOTP(user?.userEmail);
-            await sendOTPEmail(user?.userEmail, otp);
-            res.send(result);
-        }
-
-    }
-    catch (error) {
-        res.status(500).send('Error retrieving user');
     }
 }
 
@@ -181,15 +183,10 @@ const replaceData = async (req, res) => {
         const info = req.body;
         const query = { userEmail: email };
 
-        const currentDate = new Date();
-        const creationDate = currentDate.toISOString().slice(0, 10);
-
         const options = {
             ...info,
             userRole: 'user',
             accountStatus: 'not verified',
-            drivingLisence: 'unavailable',
-            creationDate: creationDate,
         }
         const existUser = await collection.findOne(query);
         if (!existUser) {
@@ -203,23 +200,24 @@ const replaceData = async (req, res) => {
     }
 }
 
+
 const updateRole = async (req, res) => {
-    const id = req.params.id;  // Get user ID from the URL params
+    const id = req.params.id;
     const { newRole } = req.body;
     const db = await connectDB();
-    const collection = db.collection('users');  // Get the new role from the request body
+    const collection = db.collection('users');
 
     if (!newRole) {
         return res.status(400).send({ message: 'New role is required' });
     }
 
-    const filter = { _id: new ObjectId(id) };  // Find the user by ID
+    const filter = { _id: new ObjectId(id) };
     const updateDoc = {
-        $set: { userRole: newRole }  // Set the new role
+        $set: { userRole: newRole }
     };
 
     try {
-        const result = await collection.updateOne(filter, updateDoc);  // Update the role in the database
+        const result = await collection.updateOne(filter, updateDoc);
         if (result.modifiedCount === 1) {
             res.send({ message: 'Role updated successfully' });
         } else {
@@ -231,4 +229,41 @@ const updateRole = async (req, res) => {
     }
 };
 
-module.exports = { showUsers, getUser, insertUser, updateOne, addOne, replaceData, ownerInfo, updateRole, checkUser, updateStatus }
+const deleteUser = async (req, res) => {
+    const db = await connectDB();
+    const collection = db.collection('users');
+    const { id } = req.params;
+
+    if (!ObjectId.isValid(id)) {
+        return res.status(400).send({ message: 'Invalid agency ID' });
+    }
+
+    try {
+        const result = await collection.deleteOne({ _id: new ObjectId(id) });
+
+        if (result.deletedCount === 1) {
+            res.status(200).send({ message: 'user deleted successfully' });
+        } else {
+            res.status(404).send({ message: 'user not found' });
+        }
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        res.status(500).send({ message: 'Error deleting user', error });
+    }
+};
+
+const getModerators = async (req, res) => {
+    try {
+        const db = await connectDB();
+        const collection = db.collection('users');
+
+        const moderators = await collection.find({ userRole: 'moderator' }).toArray();
+        res.status(200).json(moderators);
+
+    } catch (error) {
+        console.error("Error fetching moderators: ", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+module.exports = { showUsers, getUser, insertUser, updateOne, addOne, replaceData, ownerInfo, updateRole, checkUser, updateStatus, driverInfo, deleteUser, getModerators }
