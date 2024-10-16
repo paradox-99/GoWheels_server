@@ -1,5 +1,7 @@
 const connectDB = require("../config/db")
 const { ObjectId } = require('mongodb');
+const { generateAndStoreOTP } = require('../config/otpService');
+const { sendOTPEmail } = require('../config/nodeMialer');
 
 const showUsers = async (req, res) => {
     try {
@@ -50,13 +52,13 @@ const checkUser = async (req, res) => {
         const phoneCheck = await collection.findOne({ "phone": phone });
         const nidCheck = await collection.findOne({ "nid": nid });
 
-      if(phoneCheck){
-        phoneExists = true
-      }
+        if (phoneCheck) {
+            phoneExists = true
+        }
 
-      if(nidCheck){
-        nidExists = true
-      }
+        if (nidCheck) {
+            nidExists = true
+        }
         res.json({
             phoneExists,
             nidExists
@@ -71,20 +73,35 @@ const insertUser = async (req, res) => {
     try {
         const db = await connectDB();
         const collection = db.collection('users');
+
         const user = req.body;
         const query = { userEmail: user?.userEmail };
+
+        const currentDate = new Date();
+        const creationDate = currentDate.toISOString().slice(0, 10);
+
         const options = {
             ...user,
             userRole: 'user',
             accountStatus: 'not verified',
             drivingLisence: 'unavailable',
+            creationDate: creationDate,
         }
+
         const existUser = await collection.findOne(query);
+
         if (existUser) {
             return res.send({ message: "user already exists", insertedId: null });
         }
+
         const result = await collection.insertOne(options);
-        res.send(result);
+
+        if (result.insertedId) {
+            const otp = await generateAndStoreOTP(user?.userEmail);
+            await sendOTPEmail(user?.userEmail, otp);
+            res.send(result);
+        }
+
     }
     catch (error) {
         res.status(500).send('Error retrieving user');
@@ -138,11 +155,15 @@ const replaceData = async (req, res) => {
         const info = req.body;
         const query = { userEmail: email };
 
+        const currentDate = new Date();
+        const creationDate = currentDate.toISOString().slice(0, 10);
+
         const options = {
             ...info,
             userRole: 'user',
             accountStatus: 'not verified',
             drivingLisence: 'unavailable',
+            creationDate: creationDate,
         }
         const existUser = await collection.findOne(query);
         if (!existUser) {
@@ -183,9 +204,5 @@ const updateRole = async (req, res) => {
         res.status(500).send({ message: 'Internal server error' });
     }
 };
-
-// Export the updateRole function
-module.exports = { updateRole };
-
 
 module.exports = { showUsers, getUser, insertUser, updateOne, addOne, replaceData, ownerInfo, updateRole, checkUser }
