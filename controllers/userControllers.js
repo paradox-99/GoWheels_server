@@ -54,7 +54,7 @@ const driverInfo = async (req, res) => {
         const result = await collection.insertOne(ownerData);
         res.status(201).json({ message: 'Data inserted successfully', result });
     } catch (error) {
-        res.status(500).json({ message: 'Error inserting data', error }); 
+        res.status(500).json({ message: 'Error inserting data', error });
     }
 };
 
@@ -220,4 +220,33 @@ const getModerators = async (req, res) => {
 };
 
 
-module.exports = { showUsers, getUser, insertUser, updateOne, addOne, replaceData, ownerInfo, updateRole, deleteUser, getModerators,driverInfo }
+const checkUser = async (req, res) => {
+    try {
+        const db = await connectDB();
+        const collection = db.collection('users');
+        const { phone, nid } = req.query;
+        let phoneExists = false;
+        let nidExists = false;
+
+        const phoneCheck = await collection.findOne({ "phone": phone });
+        const nidCheck = await collection.findOne({ "nid": nid });
+
+        if (phoneCheck) {
+            phoneExists = true
+        }
+
+        if (nidCheck) {
+            nidExists = true
+        }
+        res.json({
+            phoneExists,
+            nidExists
+        });
+    } catch (error) {
+        console.error('Error checking user existence', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+}
+
+
+module.exports = { showUsers, getUser, insertUser, updateOne, addOne, replaceData, ownerInfo, updateRole, deleteUser, getModerators, driverInfo, checkUser }
