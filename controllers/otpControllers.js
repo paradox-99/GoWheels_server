@@ -49,6 +49,7 @@ const verifyOTP = async (req, res) => {
         }
 
         const { otp: otpRecord, expiresAt } = storedOTP;
+        console.log(storedOTP)
         const currentTime = new Date().getTime();
 
         if (otp === otpRecord && currentTime < expiresAt) {
