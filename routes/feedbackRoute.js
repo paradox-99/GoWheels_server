@@ -1,5 +1,5 @@
 const express = require('express')
-const { getCarReviews, createCarReview, updateCarReview } = require('../controllers/carFeedbackController')
+const { getCarReviews, createCarReview } = require('../controllers/carFeedbackController')
 const Router = express.Router();
 
 Router.get('/feedbacks/:carId', getCarReviews )

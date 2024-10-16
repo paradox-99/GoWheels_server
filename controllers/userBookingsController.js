@@ -36,8 +36,7 @@ const getUserBookedCars = async (req, res) => {
         const bookingsCollection = db.collection('bookings');
         const carsCollection = db.collection('vehiclesData');
         const userId = req.params.userId;
-
-        // Fetch bookings for the given userId -m
+    // Fetch bookings for the given userId -m
         const userBookings = await bookingsCollection.find({ userId: userId }).toArray();
         
         if (!userBookings.length) {
@@ -98,7 +97,6 @@ const getFreeCarsForSearchResult = async (req, res) => {
                 total = [...total, ...car2];
             })
         }))
-
         res.send(total)
     }
     catch (error) {
