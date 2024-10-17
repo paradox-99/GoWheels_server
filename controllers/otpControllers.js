@@ -16,7 +16,7 @@ const replaceOTP = async (req, res) => {
             userEmail: email,
             otp: newOTP,
             createdAt: new Date(),
-            expiresAt: new Date().getTime() + 10 * 60 * 1000,
+            expiresAt: new Date(Date.now() + 10 * 60 * 1000),
         };
 
         const result = await collection.replaceOne(
@@ -50,11 +50,10 @@ const verifyOTP = async (req, res) => {
 
         const { otp: otpRecord, expiresAt } = storedOTP;
         console.log(storedOTP)
-        const currentTime = new Date().getTime();
+        const currentTime = new Date();
 
-        if (otp === otpRecord && currentTime < expiresAt) {
+        if (otp === otpRecord && currentTime < new Date(expiresAt)) {
             return res.send({ message: "OTP verified successfully!" });
-
         } else {
             return res.status(400).send("Invalid or expired OTP.");
         }
