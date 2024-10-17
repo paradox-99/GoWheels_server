@@ -121,7 +121,6 @@ const getFreeCarsForSearchResult = async (req, res) => {
                 total = [...total, ...car2];
             })
         }))
-
         res.send(total)
     }
     catch (error) {
