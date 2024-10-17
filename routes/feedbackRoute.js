@@ -3,6 +3,8 @@ const { getCarReviews, createCarReview } = require('../controllers/carFeedbackCo
 const Router = express.Router();
 
 Router.get('/feedbacks/:carId', getCarReviews )
-Router.get('/feedbacks', createCarReview )
+Router.post('/feedback', createCarReview)
+// Router.put('/feedback/:reviewId', updateCarReview);
+
 
 module.exports = Router;
