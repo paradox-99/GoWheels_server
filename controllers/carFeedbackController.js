@@ -64,20 +64,56 @@ const getCarReviews = async (req, res) => {
         //  TODO : if we decide that user data will come from user collection for less storage -m
 
         // const reviewsWithUserInfo = await Promise.all(reviews.map(async (review) => {
-            //     const user = await usersCollection.findOne({ _id: new ObjectId(review.userId) }, { projection: { firstName: 1, lastName: 1, image: 1 } });
-            //     return {
-                //         ...review,
-                //         userName: user ? `${user.firstName} ${user.lastName}` : 'Unknown User',
-                //         userImage: user ? user.image : '##' // Fallback image 
-                //     };
-                // }));
-                
+        //     const user = await usersCollection.findOne({ _id: new ObjectId(review.userId) }, { projection: { firstName: 1, lastName: 1, image: 1 } });
+        //     return {
+        //         ...review,
+        //         userName: user ? `${user.firstName} ${user.lastName}` : 'Unknown User',
+        //         userImage: user ? user.image : '##' // Fallback image 
+        //     };
+        // }));
 
-    
-                res.status(200).send(reviews);
-            } catch (error) {
+
+        // console.log(reviews);
+        res.status(200).send(reviews);
+    } catch (error) {
         res.status(500).send({ message: 'Error fetching car reviews' });
     }
 };
+const updateCarReview = async (req, res) => {
+    try {
+        const db = await connectDB();
+        const carReviewsCollection = db.collection('reviews');
 
-module.exports = { createCarReview, getCarReviews };
+        const reviewId = req.params.reviewId;
+        // console.log(reviewId);
+        const { review, rating, agencyResponse } = req.body;
+        // console.log(req.body);
+        if (!review || !rating) {
+            return res.status(400).json({ message: "Review and rating are required." });
+        }
+
+        // Update review
+        const updatedReview = {
+            review,
+            rating,
+            agencyResponse,
+            date: new Date(),
+        };
+        console.log(updatedReview);
+
+        const result = await carReviewsCollection.updateOne(
+            { _id: new ObjectId(reviewId) },
+            { $set: updatedReview }
+        );
+
+        if (result.matchedCount === 0) {
+            return res.status(404).json({ message: 'Review not found.' });
+        }
+
+        res.send(result)
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating review', error });
+    }
+};
+
+module.exports = { createCarReview, getCarReviews, updateCarReview };
