@@ -85,7 +85,8 @@ const insertUser = async (req, res) => {
             ...user,
             userRole: 'user',
             accountStatus: 'not verified',
-            drivingLicense: 'unavailable'
+            drivingLicense: 'unavailable',
+            creationTime: new Date().toISOString().split('T')[0]
         }
         const query = { userEmail: user?.userEmail };
         const existUser = await collection.findOne(query);
@@ -155,7 +156,6 @@ const updateOne = async (req, res) => {
 const updateStatus = async (req, res) => {
 
     const email = req.params.email;
-    const { accountStatus } = req.body;
 
     try {
         const db = await connectDB();
@@ -163,7 +163,7 @@ const updateStatus = async (req, res) => {
 
         const result = await collection.updateOne(
             { userEmail: email },
-            { $set: { accountStatus } }
+            { $set: { accountStatus: "verified" } }
         );
 
         if (result.modifiedCount > 0) {
@@ -238,7 +238,8 @@ const replaceData = async (req, res) => {
             ...info,
             userRole: 'user',
             accountStatus: 'not verified',
-            drivingLicense: 'unavailable'
+            drivingLicense: 'unavailable',
+            creationTime: new Date().toISOString().split('T')[0]
         }
         const existUser = await collection.findOne(query);
         if (!existUser) {
