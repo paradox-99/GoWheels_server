@@ -18,7 +18,7 @@ const connectDB = async () => {
 
         await client.connect();
         const db = client.db('GoWheels');
-        console.log('MongoDB connected');
+        console.log('MongoDB connected'); 
         return db;
     }
     catch (error) {

@@ -51,9 +51,25 @@ const driverInfo = async (req, res) => {
     try {
         const db = await connectDB();
         const collection = db.collection('users');
-        const ownerData = req.body;
-        const result = await collection.insertOne(ownerData);
-        res.status(201).json({ message: 'Data inserted successfully', result });
+        const user = req.body;
+        const options = {
+            ...user,
+            userRole: 'driver',
+            accountStatus: 'not verified',
+            emailVerified: 'not verified'
+        }
+        const query = { userEmail: user?.userEmail };
+        const existUser = await collection.findOne(query);
+        if (existUser) {
+            return res.send({ message: "user already exists", insertedId: null });
+        }
+
+        const result = await collection.insertOne(options);
+        if (result.insertedId) {
+            const otp = await generateAndStoreOTP(user?.userEmail);
+            await sendOTPEmail(user?.userEmail, otp)
+            return res.send(result);
+        }
     } catch (error) {
         res.status(500).json({ message: 'Error inserting data', error });
     }
@@ -86,7 +102,7 @@ const insertUser = async (req, res) => {
         }
     }
     catch (error) {
-       return res.status(500).send('Error retrieving user');
+        return res.status(500).send('Error retrieving user');
     }
 }
 
@@ -154,6 +170,34 @@ const updateStatus = async (req, res) => {
             return res.send(result);
         } else {
             return res.status(404).send({ message: "User not found or no changes made." });
+        }
+    }
+    catch (error) {
+        console.log(error)
+        res.status(500).send("Server error while updating account status.");
+    }
+}
+
+
+// munia 
+const updateStatusEmailVerified = async (req, res) => {
+
+    const email = req.params.email;
+    const { emailVerified } = req.body;
+
+    try {
+        const db = await connectDB();
+        const collection = db.collection('users');
+
+        const result = await collection.updateOne(
+            { userEmail: email },
+            { $set: {emailVerified }}
+        );
+
+        if (result.modifiedCount > 0) {
+            return res.send(result);
+        } else {
+            return res.status(404).send({ message: "User not found or no changes made." }); 
         }
     }
     catch (error) {
@@ -275,4 +319,4 @@ const getModerators = async (req, res) => {
     }
 };
 
-module.exports = { showUsers, getUser, insertUser, updateOne, addOne, replaceData, ownerInfo, updateRole, checkUser, updateStatus, driverInfo, deleteUser, getModerators }
+module.exports = { showUsers, getUser, insertUser, updateOne, addOne, replaceData, ownerInfo, updateRole, checkUser, updateStatus, driverInfo, deleteUser, getModerators, updateStatusEmailVerified }
