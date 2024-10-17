@@ -83,7 +83,6 @@ const insertUser = async (req, res) => {
             await sendOTPEmail(user?.userEmail, otp)
             return res.send(result);
         }
-
     }
     catch (error) {
        return res.status(500).send('Error retrieving user');
