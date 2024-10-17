@@ -11,7 +11,7 @@ const payment = require('./routes/payment')
 const feedbacksRoute = require('./routes/feedbackRoute')
 const driverRoute = require('./routes/driverRoute')
 const otp = require('./routes/otpRoutes');
-
+const { setupTTLIndex } = require('./controllers/otpControllers');
 
 const app = express(); 
  
@@ -28,6 +28,7 @@ app.use(cors({
 ));
 
 app.use(express.json());
+setupTTLIndex();
 
 app.use('/api/authorization', authRoutes);
 app.use('/api/usersRoute', userRoutes);
