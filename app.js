@@ -1,5 +1,8 @@
 const express = require('express');
 const cors = require('cors');
+const http = require('http');  
+const socketIO = require('socket.io');
+
 
 const authRoutes = require('./routes/authRoutes')
 const userRoutes = require('./routes/userRoutes');
@@ -14,6 +17,17 @@ const otp = require('./routes/otpRoutes');
 const { setupTTLIndex } = require('./controllers/otpControllers');
 
 const app = express(); 
+const server = http.createServer(app);
+
+const io = socketIO(server);
+
+io.on('connection', (socket) => {
+    console.log('A user connected');
+
+    socket.on('disconnect', () => {
+        console.log('User disconnected');
+    });
+});
  
 app.use(cors({
     origin: [
@@ -30,7 +44,7 @@ app.use(cors({
 ));
 
 app.use(express.json());
-app.use(express.urlencoded());
+app.use(express.urlencoded({ extended: true }));
 setupTTLIndex();
 
 app.use('/api/authorization', authRoutes);
@@ -44,4 +58,4 @@ app.use('/api/feedbackRoute', feedbacksRoute)
 app.use('/api/driverRoute', driverRoute)
 app.use('/api/otpRoutes', otp)
 
-module.exports = app;
+module.exports = { app, server, io };
