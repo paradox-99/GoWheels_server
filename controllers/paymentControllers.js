@@ -3,6 +3,8 @@ const { ObjectId } = require('mongodb')
 
 const dotenv = require('dotenv');
 const { default: axios } = require("axios");
+const { sendEmail } = require('../config/nodeMialer');
+
 dotenv.config();
 
 // const store_id = process.env.SSL_Store_ID
@@ -95,22 +97,37 @@ const order = async (req, res) => {
 
 const paymentSuccess = async (req, res) => {
     try {
-        const db = await connectDB()
-        const paymentCollection = db.collection('payment')
+        const db = await connectDB();
+        const paymentCollection = db.collection('payment');
 
-        const result = await paymentCollection.updateOne({ tranjectionId: req.params.tranId }, {
-            $set: {
-                paidStatus: true,
-            }
-        })
+        // Update the payment status using the correct field name "tranjectionId"
+        const result = await paymentCollection.updateOne(
+            { tranjectionId: req.params.tranId }, // Using "tranjectionId" as in the document
+            { $set: { paidStatus: true } }
+        );
+
         if (result.modifiedCount > 0) {
-            res.redirect(`http://localhost:5173/payment/success/${req.params.tranId}`)
+            // Send the hardcoded email
+            await sendEmail(
+                'farzana.hossain147@gmail.com',   
+                'John Doe',                       
+                'car123',                         
+                'Tesla Model S',                  
+                '2024-10-20'                      
+            );
+
+            // Redirect after successful update and email
+            return res.redirect(`http://localhost:5173/payment/success/${req.params.tranId}`);
+        } else {
+            return res.status(404).send('Transaction not found or already updated.');
         }
 
     } catch (error) {
-        res.status(500).send('Error payment');
+        console.error('Error processing payment:', error);
+        res.status(500).send('Error processing payment');
     }
-}
+};
+
 
 const paymentFail = async (req, res) => {
     try {

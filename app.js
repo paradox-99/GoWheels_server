@@ -17,6 +17,8 @@ const app = express();
  
 app.use(cors({
     origin: [
+        '*',
+        "http://localhost:5176",
         'http://localhost:5172',
         'http://localhost:5173',
         'http://localhost:5174',
@@ -35,7 +37,7 @@ app.use('/api/authorization', authRoutes);
 app.use('/api/usersRoute', userRoutes);
 app.use('/api/carsRoute', carRoute);
 app.use('/api/reviewsRoute', reviewsAndRatingsRoute);
-app.use('/api/agencyRoute', agency);
+app.use('/api/agencyRoute', agency); // Ensure this is correct
 app.use('/api/bookings', bookingRoute)
 app.use('/api/payment', payment)
 app.use('/api/feedbackRoute', feedbacksRoute)
