@@ -4,6 +4,8 @@ const { ObjectId } = require('mongodb')
 const dotenv = require('dotenv');
 const { default: axios } = require("axios");
 const { sendEmail } = require('../config/nodeMialer');
+const { io } = require('../app'); 
+
 
 dotenv.config();
 
@@ -102,7 +104,7 @@ const paymentSuccess = async (req, res) => {
 
         // Update the payment status using the correct field name "tranjectionId"
         const result = await paymentCollection.updateOne(
-            { tranjectionId: req.params.tranId }, // Using "tranjectionId" as in the document
+            { tranjectionId: req.params.tranId },
             { $set: { paidStatus: true } }
         );
 
@@ -115,13 +117,14 @@ const paymentSuccess = async (req, res) => {
                 'Tesla Model S',                  
                 '2024-10-20'                      
             );
+            // Emit the payment success event through Socket.io
+            io.emit('payment-success', { message: 'Your payment was successful!' });
 
             // Redirect after successful update and email
             return res.redirect(`http://localhost:5173/payment/success/${req.params.tranId}`);
         } else {
             return res.status(404).send('Transaction not found or already updated.');
         }
-
     } catch (error) {
         console.error('Error processing payment:', error);
         res.status(500).send('Error processing payment');
