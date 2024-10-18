@@ -1,14 +1,21 @@
 const connectDB = require("../config/db")
 const { ObjectId } = require('mongodb');
+const { generateAndStoreOTP } = require('../config/otpService');
+const { sendOTPEmail } = require('../config/nodeMialer');
 
 const showUsers = async (req, res) => {
     try {
         const db = await connectDB();
         const collection = db.collection('users');
-        const users = await collection.find().toArray();
+        const { search } = req.query;
+        const query = search ? {
+            firstName: { $regex: search, $options: 'i' },
+        } : {};
+
+        const users = await collection.find(query).toArray();
         res.send(users);
-    }
-    catch (error) {
+    } catch (error) {
+        console.error(error);
         res.status(500).send('Error retrieving users');
     }
 }
@@ -20,6 +27,7 @@ const getUser = async (req, res) => {
         const email = req.params.email;
         const query = { "userEmail": email }
         const user = await collection.findOne(query);
+        // console.log(user);
         res.send(user);
 
     }
@@ -40,6 +48,34 @@ const ownerInfo = async (req, res) => {
     }
 };
 
+const driverInfo = async (req, res) => {
+    try {
+        const db = await connectDB();
+        const collection = db.collection('users');
+        const user = req.body;
+        const options = {
+            ...user,
+            userRole: 'driver',
+            accountStatus: 'not verified',
+            emailVerified: 'not verified'
+        }
+        const query = { userEmail: user?.userEmail };
+        const existUser = await collection.findOne(query);
+        if (existUser) {
+            return res.send({ message: "user already exists", insertedId: null });
+        }
+
+        const result = await collection.insertOne(options);
+        if (result.insertedId) {
+            const otp = await generateAndStoreOTP(user?.userEmail);
+            await sendOTPEmail(user?.userEmail, otp)
+            return res.send(result);
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Error inserting data', error });
+    }
+};
+
 const insertUser = async (req, res) => {
     try {
         const db = await connectDB();
@@ -50,6 +86,8 @@ const insertUser = async (req, res) => {
             ...user,
             userRole: 'user',
             accountStatus: 'not verified',
+            drivingLicense: 'unavailable',
+            creationTime: new Date().toISOString().split('T')[0]
         }
         const query = { userEmail: user?.userEmail };
         const existUser = await collection.findOne(query);
@@ -58,10 +96,42 @@ const insertUser = async (req, res) => {
         }
 
         const result = await collection.insertOne(options);
-        res.send(result);
+        if (result.insertedId) {
+            const otp = await generateAndStoreOTP(user?.userEmail);
+            await sendOTPEmail(user?.userEmail, otp)
+            return res.send(result);
+        }
     }
     catch (error) {
-        res.status(500).send('Error retrieving user');
+        return res.status(500).send('Error retrieving user');
+    }
+}
+
+const checkUser = async (req, res) => {
+    try {
+        const db = await connectDB();
+        const collection = db.collection('users');
+        const { phone, nid } = req.query;
+        let phoneExists = false;
+        let nidExists = false;
+
+        const phoneCheck = await collection.findOne({ "phone": phone });
+        const nidCheck = await collection.findOne({ "nid": nid });
+
+        if (phoneCheck) {
+            phoneExists = true
+        }
+
+        if (nidCheck) {
+            nidExists = true
+        }
+        res.json({
+            phoneExists,
+            nidExists
+        });
+    } catch (error) {
+        console.error('Error checking user existence', error);
+        res.status(500).json({ message: 'Server error' });
     }
 }
 
@@ -81,6 +151,59 @@ const updateOne = async (req, res) => {
     }
     catch (error) {
         res.status(500).send('Error retrieving user');
+    }
+}
+
+const updateStatus = async (req, res) => {
+
+    const email = req.params.email;
+
+    try {
+        const db = await connectDB();
+        const collection = db.collection('users');
+
+        const result = await collection.updateOne(
+            { userEmail: email },
+            { $set: { accountStatus: "verified" } }
+        );
+
+        if (result.modifiedCount > 0) {
+            return res.send(result);
+        } else {
+            return res.status(404).send({ message: "User not found or no changes made." });
+        }
+    }
+    catch (error) {
+        console.log(error)
+        res.status(500).send("Server error while updating account status.");
+    }
+}
+
+
+// munia 
+const updateStatusEmailVerified = async (req, res) => {
+
+    const email = req.params.email;
+    const { emailVerified } = req.body;
+
+    try {
+        const db = await connectDB();
+        const collection = db.collection('users');
+
+        const result = await collection.updateOne(
+            { userEmail: email },
+            { $set: { emailVerified } }
+        );
+
+        if (result.modifiedCount > 0) {
+            return res.send(result);
+        } else {
+            return res.status(404).send({ message: "User not found or no changes made." });
+        }
+    }
+    catch (error) {
+        console.log(error)
+        res.status(500).send("Server error while updating account status.");
     }
 }
 
@@ -116,6 +239,8 @@ const replaceData = async (req, res) => {
             ...info,
             userRole: 'user',
             accountStatus: 'not verified',
+            drivingLicense: 'unavailable',
+            creationTime: new Date().toISOString().split('T')[0]
         }
         const existUser = await collection.findOne(query);
         if (!existUser) {
@@ -130,26 +255,23 @@ const replaceData = async (req, res) => {
 }
 
 
-
-
-// Update user role by admin
 const updateRole = async (req, res) => {
-    const id = req.params.id;  // Get user ID from the URL params
+    const id = req.params.id;
     const { newRole } = req.body;
     const db = await connectDB();
-    const collection = db.collection('users');  // Get the new role from the request body
+    const collection = db.collection('users');
 
     if (!newRole) {
         return res.status(400).send({ message: 'New role is required' });
     }
 
-    const filter = { _id: new ObjectId(id) };  // Find the user by ID
+    const filter = { _id: new ObjectId(id) };
     const updateDoc = {
-        $set: { userRole: newRole }  // Set the new role
+        $set: { userRole: newRole }
     };
 
     try {
-        const result = await collection.updateOne(filter, updateDoc);  // Update the role in the database
+        const result = await collection.updateOne(filter, updateDoc);
         if (result.modifiedCount === 1) {
             res.send({ message: 'Role updated successfully' });
         } else {
@@ -161,8 +283,60 @@ const updateRole = async (req, res) => {
     }
 };
 
-// Export the updateRole function
-module.exports = { updateRole };
+const deleteUser = async (req, res) => {
+    const db = await connectDB();
+    const collection = db.collection('users');
+    const { id } = req.params;
 
+    if (!ObjectId.isValid(id)) {
+        return res.status(400).send({ message: 'Invalid agency ID' });
+    }
 
-module.exports = { showUsers, getUser, insertUser, updateOne, addOne, replaceData, ownerInfo, updateRole }
+    try {
+        const result = await collection.deleteOne({ _id: new ObjectId(id) });
+
+        if (result.deletedCount === 1) {
+            res.status(200).send({ message: 'user deleted successfully' });
+        } else {
+            res.status(404).send({ message: 'user not found' });
+        }
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        res.status(500).send({ message: 'Error deleting user', error });
+    }
+};
+
+const driverList = async (req, res) => {
+    const role = req.query.role;
+  
+    try {
+        const db = await connectDB();
+        const collection = db.collection('users');
+
+        const query = role ? { userRole: role } : {};
+        const result = await collection.find(query).toArray();
+
+        console.log(result)
+        res.send(result);
+
+    }
+    catch (error) {
+        console.log(error)
+    }
+}
+
+const getModerators = async (req, res) => {
+    try {
+        const db = await connectDB();
+        const collection = db.collection('users');
+
+        const moderators = await collection.find({ userRole: 'moderator' }).toArray();
+        res.status(200).json(moderators);
+
+    } catch (error) {
+        console.error("Error fetching moderators: ", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+module.exports = { showUsers, getUser, insertUser, updateOne, addOne, replaceData, ownerInfo, updateRole, checkUser, updateStatus, driverInfo, deleteUser, getModerators, updateStatusEmailVerified, driverList }

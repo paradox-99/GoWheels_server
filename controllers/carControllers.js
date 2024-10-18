@@ -1,6 +1,7 @@
 const connectDB = require("../config/db")
 const {ObjectId} = require('mongodb')
 
+
 // api to get all vehicles data
 const showCars = async(req, res) => {
     try{
@@ -61,15 +62,7 @@ const vehiclesInfo = async (req, res) => {
     }
   };
 
-const addVehicle = async (req, res) => {
-    try{
-        const db = await connectDB();
-        const collection = db.collection('vehiclesData');
-    }
-    catch(error){
-        res.status(500).send( 'Error retrieving vehicle.');
-    }
-}
+
 
 const getCarsByBrand = async(req, res) => {
     try{
@@ -85,4 +78,4 @@ const getCarsByBrand = async(req, res) => {
     }
 }
 
-module.exports = { showCars, getVehiclesAgency, getVehicle, addVehicle, getCarsByBrand, vehiclesInfo }
+module.exports = { showCars, getVehiclesAgency, getVehicle,  getCarsByBrand, vehiclesInfo }
