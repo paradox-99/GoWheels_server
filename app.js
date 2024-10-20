@@ -14,6 +14,7 @@ const payment = require('./routes/payment')
 const feedbacksRoute = require('./routes/feedbackRoute')
 const driverRoute = require('./routes/driverRoute')
 const otp = require('./routes/otpRoutes');
+const totalInfo = require('./routes/totalRoutes')
 const { setupTTLIndex } = require('./controllers/otpControllers');
 
 const app = express();
@@ -71,5 +72,6 @@ app.use('/api/payment', payment(io))
 app.use('/api/feedbackRoute', feedbacksRoute)
 app.use('/api/driverRoute', driverRoute)
 app.use('/api/otpRoutes', otp)
+app.use('/api/totalInfo', totalInfo)
 
 module.exports = { app, server, io };
