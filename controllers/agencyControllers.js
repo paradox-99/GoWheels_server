@@ -1,3 +1,5 @@
+
+
 const connectDB = require("../config/db")
 const { ObjectId } = require('mongodb')
 
@@ -67,7 +69,26 @@ const rejectAgency = async (req, res) => {
 }
 
 
+
 const agencyInfo = async (req, res) => {
+  try {
+    const db = await connectDB();
+    const collection = db.collection("agencyData");
+    const lastAgency = await collection.findOne(
+      {},
+      { sort: { agency_id: -1 } }
+    );
+    let newAgencyId = 1;
+    if (lastAgency && lastAgency.agency_id) {
+      newAgencyId = parseInt(lastAgency.agency_id.replace("AG", "")) + 1;
+    }
+    const agency_id = `AG${newAgencyId}`;
+    const agencyData = { ...req.body, agency_id };
+    const result = await collection.insertOne(agencyData);
+    res.status(201).json({ message: "Data inserted successfully", result });
+  } catch (error) {
+    res.status(500).json({ message: "Error inserting data", error });
+  }
     try {
         const db = await connectDB();
         const collection = db.collection('agencyData');
@@ -86,49 +107,204 @@ const agencyInfo = async (req, res) => {
 };
 
 // AGENCY OWNER
-
 const agencyOwnerInfo = async (req, res) => {
     try {
-        const db = await connectDB();
-        const collection = db.collection("users");
-        const email = req.params.email; 
-        const ownerData = await collection.findOne({userEmail: email});
-        
-        if (!ownerData) {
-            return res.status(404).send("Agency owner not found");
-        }
-
-        res.send(ownerData);
+      const db = await connectDB(); // Connect to the database
+      const collection = db.collection("users"); // Use the 'users' collection
+  
+      const email = req.params.email; // Get the email from request parameters
+      const query = { userEmail: email }; // Query to find the user by email
+  
+      const ownerData = await collection.findOne(query); // Find the owner data
+  
+      // If no owner data found, return a 404 response
+      if (!ownerData) {
+        return res.status(404).send("Agency owner not found");
+      }
+  
+      // If owner data found, send the data as a response
+      return res.status(200).send(ownerData);
+  
     } catch (error) {
-        console.error("Error retrieving agency owner data:", error);
-        res.status(500).send("Error retrieving agency owner data");
+      // Handle any errors that occur during the process
+      console.error("Error retrieving agency owner information:", error);
+      return res.status(500).send("Server error while retrieving agency owner info");
     }
-};
-
+  };
 
 // UPDATE AGENCY
 const updateAgencyOwnerInfo = async (req, res) => {
     try {
         const db = await connectDB();
-        const collection = db.collection('users');
-
+        const collection = db.collection("users");
         const email = req.params.email;
-        const updatedData = req.body;
-        const query = { userEmail: email };
+  
+        // Extract fields from request body
+        const { firstName, lastName, phone, gender, image, division, district, upazilla, nid, dateOfBirth } = req.body;
+  
+        // Build the update document with dot notation for nested fields
         const updateDoc = {
-            $set: updatedData
+            $set: {
+                ...(firstName && { firstName }),
+                ...(lastName && { lastName }),
+                ...(phone && { phone }),
+                ...(nid && { nid }),
+                ...(dateOfBirth && { dateOfBirth }),
+                ...(gender && { gender }),        // Ensure these are included
+                ...(image && { image }),          // Ensure these are included
+                ...(division && { "userAddress.division": division }),
+                ...(district && { "userAddress.district": district }),
+                ...(upazilla && { "userAddress.upazilla": upazilla }),
+            },
         };
+  
+        const query = { userEmail: email };
+  
+        // Perform the update
         const result = await collection.updateOne(query, updateDoc);
+  
         if (result.modifiedCount === 0) {
-            return res.status(404).send('User not found or no changes made');
+            return res.status(404).send("User not found or no changes made");
         }
-        res.status(200).send('User updated successfully');
+  
+        res.status(200).send("User updated successfully");
     } catch (error) {
-        res.status(500).send('Error updating user: ' + error.message);
+        res.status(500).send("Error updating user: " + error.message);
     }
 };
 
 
+// ADD VEHICLE FROM AGENCY OWNER DASHBOARD
+// const addVehicleByAgency = async (req, res) => {
+//     try {
+//       const db = await connectDB();
+//       const collection = db.collection("vehiclesData");
+
+//       // Extract vehicle data from the request body
+//       const {
+//         licenseNumber,
+//         avatar,
+//         seat,
+//         mileage,
+//         gear,
+//         fuel,
+//         rentalPrice,
+//         transmission,
+//         brand,
+//         model,
+//         buildYear,
+//         expireDate,
+//         fitnessCertificate,
+//         issuingAuthority,
+//         insuranceNumber,
+//         insurancePeriod,
+//         insuranceDetails,
+//       } = req.body;
+
+//       // Create the new vehicle object
+//       const newVehicle = {
+//         licenseNumber,
+//         avatar,
+//         seat,
+//         mileage,
+//         gear,
+//         fuel,
+//         rentalPrice,
+//         transmission,
+//         brand,
+//         model,
+//         buildYear,
+//         expireDate,
+//         fitnessCertificate,
+//         issuingAuthority,
+//         insuranceNumber,
+//         insurancePeriod,
+//         insuranceDetails,
+//         addedAt: new Date(), // Timestamp of when the vehicle is added
+//       };
+
+//       // Insert the new vehicle into the collection
+//       const result = await collection.insertOne(newVehicle);
+
+//       // Send a success response
+//       res.status(201).json({
+//         message: "Vehicle added successfully",
+//         vehicleId: result.insertedId,
+//         data: newVehicle,
+//       });
+
+//     } catch (error) {
+//       console.error("Error adding vehicle:", error);
+//       res.status(500).json({
+//         message: "Failed to add vehicle",
+//         error: error.message,
+//       });
+//     }
+//   };
+
+const addVehicleByAgency = async (req, res) => {
+  try {
+    const db = await connectDB();
+    const collection = db.collection("vehiclesData");
+    const vehicleData = req.body;
+
+    // console.log(vehicleData);
+    const result = await collection.insertOne(vehicleData);
+    res.status(201).send(result); // Respond with the result
+  } catch (error) {
+    console.error("Error adding vehicle:", error);
+    res.status(500).send("Error adding vehicle. Please try again later.");
+  }
+};
+
+// GET THE VEHICLE INFO FOR THAT AGENCY USER
+const getVehicleInfo = async (req, res) => {
+  try {
+    const db = await connectDB();
+    const collection = db.collection("vehiclesData");
+    const userEmail = req.params.userEmail;
+    const query = { "agencyInfo.userEmail": userEmail };
+
+    const vehicleInfo = await collection.find(query).toArray();
+    if (!vehicleInfo) {
+      return res.status(404).send("Vehicle info not found");
+    }
+    res.send(vehicleInfo);
+  } catch (error) {
+    console.error("Error getting vehicle data:", error);
+    res.status(500).send("Error getting vehicle data. Please try again later.");
+  }
+};
+
+
+// GET THE BOOKING HISTORY FOR THAT AGENCY USER
+const getBookingHistory = async (req, res) => {
+  try {
+    const db = await connectDB();
+    const collection = db.collection("bookings");
+    const email = req.params.email;
+    const query = { agency_id: agency_id };
+
+    const vehicleInfo = await collection.find(query).toArray();
+    if (!vehicleInfo) {
+      return res.status(404).send("Vehicle info not found");
+    }
+    res.send(vehicleInfo);
+  } catch (error) {
+    console.error("Error getting vehicle data:", error);
+    res.status(500).send("Error getting vehicle data. Please try again later.");
+  }
+};
+
+module.exports = {
+  showAgency,
+  getAgency,
+  agencyInfo,
+  agencyOwnerInfo,
+  updateAgencyOwnerInfo,
+  addVehicleByAgency,
+  getVehicleInfo,
+};
 // delete a agency 
 const deleteAgency = async (req, res) => {
     const db = await connectDB();
@@ -183,4 +359,16 @@ const setStatus = async (req, res) => {
 };
 
 
-module.exports = { showAgency, getAgency, agencyInfo, agencyOwnerInfo, updateAgencyOwnerInfo, approveAgency, rejectAgency, deleteAgency, setStatus }
+module.exports = {
+    showAgency,
+    getAgency,
+    agencyInfo,
+    agencyOwnerInfo,
+    updateAgencyOwnerInfo,
+    addVehicleByAgency,
+    getVehicleInfo,
+    approveAgency,
+    rejectAgency,
+    deleteAgency,
+    setStatus
+  };

@@ -323,6 +323,25 @@ const deleteUser = async (req, res) => {
     }
 };
 
+const driverList = async (req, res) => {
+    const role = req.query.role;
+  
+    try {
+        const db = await connectDB();
+        const collection = db.collection('users');
+
+        const query = role ? { userRole: role } : {};
+        const result = await collection.find(query).toArray();
+
+        console.log(result)
+        res.send(result);
+
+    }
+    catch (error) {
+        console.log(error)
+    }
+}
+
 const getModerators = async (req, res) => {
     try {
         const db = await connectDB();
@@ -339,8 +358,4 @@ const getModerators = async (req, res) => {
 
 
 
-
-
-
-
-    module.exports = { showUsers, getUser, insertUser, updateOne, addOne, replaceData, ownerInfo, updateRole, checkUser, updateStatus, driverInfo, deleteUser, getModerators, updateStatusEmailVerified }
+module.exports = { showUsers, getUser, insertUser, updateOne, addOne, replaceData, ownerInfo, updateRole, checkUser, updateStatus, driverInfo, deleteUser, getModerators, updateStatusEmailVerified, driverList }
