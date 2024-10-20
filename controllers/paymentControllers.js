@@ -109,11 +109,11 @@ const paymentSuccess = async (req, res) => {
         if (result.modifiedCount > 0) {
             // Send the hardcoded email
             await sendEmail(
-                'farzana.hossain147@gmail.com',   
-                'John Doe',                       
+                'rinayeem546@gamil.com',   
+                'Radwanul Islam Nayeem',                       
                 'car123',                         
-                'Tesla Model S',                  
-                '2024-10-20'                      
+                'NissanRogue',                  
+                '2024-10-20'                    
             );
 
             // Redirect after successful update and email
