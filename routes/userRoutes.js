@@ -8,8 +8,8 @@ Router.get('/moderators', getModerators);
 Router.get('/check-user', checkUser);
 Router.get('/users/:email', getUser);
 Router.get('/check-user', checkUser);
-Router.post('/ownerInfo' , ownerInfo)
-Router.post('/driverInfo' , driverInfo)
+Router.post('/ownerInfo' , ownerInfo);
+Router.post('/driverInfo' , driverInfo);
 Router.patch('/users/:email', updateOne);
 Router.patch('/userStatus/:email', updateStatus);
 Router.patch('/emailVerified/:email', updateStatusEmailVerified);

@@ -40,8 +40,25 @@ const ownerInfo = async (req, res) => {
         const db = await connectDB();
         const collection = db.collection('users');
         const ownerData = req.body;
-        const result = await collection.insertOne(ownerData);
-        res.status(201).json({ message: 'Data inserted successfully', result });
+        const options = {
+            ...ownerData,
+            userRole: 'agency',
+            accountStatus: 'not verified',
+            emailVerified: 'not verified',
+            creationTime: new Date().toISOString().split('T')[0]
+        }
+        const query = { userEmail: ownerData?.userEmail };
+        const existUser = await collection.findOne(query);
+        if (existUser) {
+            return res.send({ message: "user already exists", insertedId: null });
+        }
+
+        const result = await collection.insertOne(options);
+        if (result.insertedId) {
+            const otp = await generateAndStoreOTP(ownerData?.userEmail);
+            await sendOTPEmail(ownerData?.userEmail, otp)
+            return res.send(result);
+        }
     } catch (error) {
         res.status(500).json({ message: 'Error inserting data', error });
     }
@@ -56,7 +73,8 @@ const driverInfo = async (req, res) => {
             ...user,
             userRole: 'driver',
             accountStatus: 'not verified',
-            emailVerified: 'not verified'
+            emailVerified: 'not verified',
+            creationTime: new Date().toISOString().split('T')[0]
         }
         const query = { userEmail: user?.userEmail };
         const existUser = await collection.findOne(query);
@@ -191,13 +209,13 @@ const updateStatusEmailVerified = async (req, res) => {
 
         const result = await collection.updateOne(
             { userEmail: email },
-            { $set: {emailVerified }}
+            { $set: { emailVerified } }
         );
 
         if (result.modifiedCount > 0) {
             return res.send(result);
         } else {
-            return res.status(404).send({ message: "User not found or no changes made." }); 
+            return res.status(404).send({ message: "User not found or no changes made." });
         }
     }
     catch (error) {
@@ -319,4 +337,10 @@ const getModerators = async (req, res) => {
     }
 };
 
-module.exports = { showUsers, getUser, insertUser, updateOne, addOne, replaceData, ownerInfo, updateRole, checkUser, updateStatus, driverInfo, deleteUser, getModerators, updateStatusEmailVerified }
+
+
+
+
+
+
+    module.exports = { showUsers, getUser, insertUser, updateOne, addOne, replaceData, ownerInfo, updateRole, checkUser, updateStatus, driverInfo, deleteUser, getModerators, updateStatusEmailVerified }
