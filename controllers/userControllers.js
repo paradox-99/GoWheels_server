@@ -27,7 +27,6 @@ const getUser = async (req, res) => {
         const email = req.params.email;
         const query = { "userEmail": email }
         const user = await collection.findOne(query);
-        // console.log(user);
         res.send(user);
 
     }
