@@ -4,8 +4,6 @@ const { ObjectId } = require('mongodb')
 const dotenv = require('dotenv');
 const { default: axios } = require("axios");
 const { sendEmail } = require('../config/nodeMialer');
-const { io } = require('../app'); 
-
 
 dotenv.config();
 
@@ -74,7 +72,7 @@ const order = async (req, res) => {
 
             const response = await axios({
                 method: "POST",
-                url: "https://sandbox.sslcommerz.com/gwprocess/v4/api.php",
+                url: `https://sandbox.sslcommerz.com/gwprocess/v4/api.php`,
                 data: initialData,
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded"
@@ -104,7 +102,7 @@ const paymentSuccess = async (req, res) => {
 
         // Update the payment status using the correct field name "tranjectionId"
         const result = await paymentCollection.updateOne(
-            { tranjectionId: req.params.tranId },
+            { tranjectionId: req.params.tranId }, // Using "tranjectionId" as in the document
             { $set: { paidStatus: true } }
         );
 
@@ -118,16 +116,12 @@ const paymentSuccess = async (req, res) => {
                 '2024-10-20'                      
             );
 
-            // Emit the payment success event through Socket.io
-            io.emit('payment-success', { message: 'Your payment was successful!' });
-           
-
             // Redirect after successful update and email
             return res.redirect(`http://localhost:5173/payment/success/${req.params.tranId}`);
-             
         } else {
             return res.status(404).send('Transaction not found or already updated.');
         }
+
     } catch (error) {
         console.error('Error processing payment:', error);
         res.status(500).send('Error processing payment');
