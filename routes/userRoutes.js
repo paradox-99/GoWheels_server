@@ -4,12 +4,15 @@ const Router = express.Router();
 
 Router.get('/users', showUsers);
 Router.get('/users/:email', getUser);
+Router.get('/check-user', checkUser);
+Router.post('/ownerInfo' , ownerInfo);
+Router.post('/driverInfo' , driverInfo);
 Router.post('/ownerInfo' , ownerInfo)
 Router.post('/driverInfo' , driverInfo)
 Router.post('/user', insertUser);
 Router.get('/check-user', checkUser);
 Router.patch('/users/:email', updateOne);
-Router.patch('/userStatus/:email', updateStatus);
+Router.patch('/userStatus/:email', updateStatus); 
 Router.patch('/emailVerified/:email', updateStatusEmailVerified);
 Router.patch('/user/:email', addOne);
 Router.put('/user/:email', replaceData);
