@@ -314,7 +314,7 @@ const getOneVehicleDetails = async (req, res) => {
     if (!oneVehicleInfo) {
       return res.status(404).send("Vehicle info not found");
     }
-    
+
     res.send(oneVehicleInfo);
   } catch (error) {
     console.error("Error getting vehicle data:", error);
@@ -332,7 +332,7 @@ const updateOneVehicleInfo = async (req, res) => {
     // Extract fields from request body
     const {
       licenseNumber,
-      // image: uploadedImage, 
+      // image: uploadedImage,
       seat,
       mileage,
       gear,
@@ -348,15 +348,8 @@ const updateOneVehicleInfo = async (req, res) => {
       insuranceNumber,
       insurancePeriod,
       insuranceDetails,
-      additionalInfo: {
-        airConditioning,
-        gps,
-        bluetooth,
-      } = {}, 
-      agencyInfo: {
-        email: userEmail,
-        agencyId: agency_id,
-      } = {}, 
+      additionalInfo: { airConditioning, gps, bluetooth } = {},
+      agencyInfo: { email: userEmail, agencyId: agency_id } = {},
     } = req.body;
 
     // Build the update document with dot notation for nested fields
@@ -379,7 +372,9 @@ const updateOneVehicleInfo = async (req, res) => {
         ...(insuranceNumber && { insuranceNumber }),
         ...(insurancePeriod && { insurancePeriod }),
         ...(insuranceDetails && { insuranceDetails }),
-        ...(airConditioning && { "additionalInfo.airConditioning": airConditioning }),
+        ...(airConditioning && {
+          "additionalInfo.airConditioning": airConditioning,
+        }),
         ...(gps && { "additionalInfo.gps": gps }),
         ...(bluetooth && { "additionalInfo.bluetooth": bluetooth }),
         ...(userEmail && { "agencyInfo.email": userEmail }),
@@ -400,6 +395,24 @@ const updateOneVehicleInfo = async (req, res) => {
   } catch (error) {
     console.error("Error updating vehicle:", error);
     res.status(500).send("Error updating vehicle: " + error.message);
+  }
+};
+
+// GET Booking History for a specific agency
+const getAgencyDataForAgency = async (req, res) => {
+  const email = req.params.email;
+
+  try {
+    const db = await connectDB();
+    const collection = db.collection("agencyData");
+
+    // Fetch bookings based on agencyId
+    const agencyData = await collection.findOne({ agencyEmail: email });
+    console.log(agencyData);
+    res.send(agencyData);
+
+  } catch (error) {
+    res.status(500).send("Internal Server Error");
   }
 };
 
@@ -472,5 +485,6 @@ module.exports = {
   deleteAgency,
   setStatus,
   getOneVehicleDetails,
-  updateOneVehicleInfo
+  updateOneVehicleInfo,
+  getAgencyDataForAgency,
 };

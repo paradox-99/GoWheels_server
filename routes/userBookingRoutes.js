@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getUserBookedCars, getUserBookings, getFavoriteCars, getFreeCarsForSearchResult } = require('../controllers/userBookingsController');
+const { getUserBookedCars, getUserBookings, getFavoriteCars, getFreeCarsForSearchResult, bookingData } = require('../controllers/userBookingsController');
 
 // get booked cars -m
 router.get('/user/:userId/booked-cars', getUserBookedCars);
@@ -10,6 +10,8 @@ router.get('/user/:userId', getUserBookings);
 router.post('/favorites', getFavoriteCars);
 
 router.get('/getSearchData', getFreeCarsForSearchResult)
+
+router.get("/bookings/:agencyId", bookingData);
 
 
 module.exports = router;
