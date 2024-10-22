@@ -1,7 +1,6 @@
 const connectDB = require("../config/db");
 const { ObjectId } = require('mongodb');
 
-
 const getUserBookings = async (req, res) => {
     try {
         const db = await connectDB();
@@ -18,7 +17,7 @@ const getUserBookings = async (req, res) => {
         const userBookings = await bookingsCollection.find(query).toArray();
         if (!userBookings.length) {
             console.log("TEST");
-            return res.send({ message: 'Ohoo! You do not have any bookings 😌' });
+            return res.send({ message: 'Ohoo! You do not have any bookings' });
         }
 
         res.status(200).json({ userBookings });
