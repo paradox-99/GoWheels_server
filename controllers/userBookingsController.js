@@ -156,22 +156,26 @@ const getFreeCarsForSearchResult = async (req, res) => {
 };
 
 const bookingData = async (req, res) => {
-  const id = req.params.agencyId;
-  try {
-    const db = await connectDB();
-    const collection = db.collection("bookings");
-    const booking = await collection.find({ agency_id: id });
-    console.log("bokiing-------->",booking);
-    if (!booking) {
-      return res.status(404).send({ message: "Booking not found" });
+    const id = req.params.agencyId;  // This gets the agencyId from the URL parameter
+    try {
+      const db = await connectDB();
+      const collection = db.collection("bookings");
+  
+      // Find bookings where the agency_id matches the provided agencyId
+      const bookings = await collection.find({ agency_id: id }).toArray();
+      console.log("Bookings fetched: ", bookings);
+  
+      if (bookings.length === 0) {
+        return res.status(404).send({ message: "No bookings found for this agency" });
+      }
+  
+      res.send(bookings);  // Send the bookings data
+    } catch (error) {
+      console.error("Error fetching bookings: ", error);
+      res.status(500).send({ message: "Internal server error" });
     }
-    res.send(booking);
-    
-  } catch (error) {
-    console.log(error);
-    res.status(500).send({ message: "Internal server error" });
-  }
-};
+  };
+  
 
 module.exports = {
   getUserBookedCars,
