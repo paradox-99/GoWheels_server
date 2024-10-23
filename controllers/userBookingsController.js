@@ -155,27 +155,77 @@ const getFreeCarsForSearchResult = async (req, res) => {
   }
 };
 
+// GET BOOKINGS DATA FROM THE BOOKINGS COLLECTION
 const bookingData = async (req, res) => {
-    const id = req.params.agencyId;  // This gets the agencyId from the URL parameter
-    try {
-      const db = await connectDB();
-      const collection = db.collection("bookings");
-  
-      // Find bookings where the agency_id matches the provided agencyId
-      const bookings = await collection.find({ agency_id: id }).toArray();
-      console.log("Bookings fetched: ", bookings);
-  
-      if (bookings.length === 0) {
-        return res.status(404).send({ message: "No bookings found for this agency" });
-      }
-  
-      res.send(bookings);  // Send the bookings data
-    } catch (error) {
-      console.error("Error fetching bookings: ", error);
-      res.status(500).send({ message: "Internal server error" });
+  const id = req.params.agencyId; // This gets the agencyId from the URL parameter
+  try {
+    const db = await connectDB();
+    const collection = db.collection("bookings");
+
+    // Find bookings where the agency_id matches the provided agencyId
+    const bookings = await collection.find({ agency_id: id }).toArray();
+    // console.log("Bookings fetched: ", bookings);
+
+    if (bookings.length === 0) {
+      return res
+        .status(404)
+        .send({ message: "No bookings found for this agency" });
     }
-  };
-  
+
+    res.send(bookings); // Send the bookings data
+  } catch (error) {
+    console.error("Error fetching bookings: ", error);
+    res.status(500).send({ message: "Internal server error" });
+  }
+};
+
+// GET ACTIVE VEHICLES FOR THAT AGENCY
+// const getPendingVehicles = async (req, res) => {
+//   const id = req.params.agencyId;
+//   try {
+//     const db = await connectDB();
+//     const collection = db.collection("bookings");
+
+//     // Query to find documents with agency_id matching the id and where status is "pending"
+//     const pendingVehicles = await collection
+//       .find({
+//         agency_id: id,
+//         status: { $exists: true, $eq: "pending" }, // Check if status exists and is "pending"
+//       })
+//       .toArray();
+
+//     if (pendingVehicles.length === 0) {
+//       return res.status(404).send({ message: "No pending vehicles found." });
+//     }
+
+//     res.send(pendingVehicles);
+//   } catch (error) {
+//     console.error("Error fetching pending vehicles:", error);
+//     res.status(500).send({ message: "Internal server error" });
+//   }
+// };
+const getPendingVehicles = async (req, res) => {
+  try {
+    const db = await connectDB();
+    const collection = db.collection("bookings");
+    const email = req.params.email;
+    console.log("Email received:", email);
+    const query = {
+      agencyEmail: email,
+      status: "Pending",
+    };
+    console.log("MongoDB Query:", query);
+    const pendingVehicles = await collection.find(query).toArray();
+    console.log("Pending Vehicles Found:", pendingVehicles);
+    if (pendingVehicles.length === 0) {
+      return res.status(404).send({ message: "No pending vehicles found." });
+    }
+    res.send(pendingVehicles);
+  } catch (error) {
+    console.error("Error fetching pending vehicles:", error);
+    res.status(500).send({ message: "Internal server error" });
+  }
+};
 
 module.exports = {
   getUserBookedCars,
@@ -183,4 +233,5 @@ module.exports = {
   getFavoriteCars,
   getFreeCarsForSearchResult,
   bookingData,
+  getPendingVehicles,
 };

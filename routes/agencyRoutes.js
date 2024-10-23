@@ -11,7 +11,8 @@ const {
   approveAgency, rejectAgency, deleteAgency, setStatus,
   getOneVehicleDetails,
   updateOneVehicleInfo,
-  getAgencyDataForAgency
+  getAgencyDataForAgency,
+  
 } = require("../controllers/agencyControllers");
 
 
@@ -35,5 +36,7 @@ Router.patch("/agency/updateOneVehicleInfo/:id", updateOneVehicleInfo);
 
 
 Router.get("/agencyData/:email", getAgencyDataForAgency);
+
+// Router.get("/activeVehicles/:agencyId", getPendingVehicles);
 
 module.exports = Router;

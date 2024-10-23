@@ -410,13 +410,10 @@ const getAgencyDataForAgency = async (req, res) => {
     const agencyData = await collection.findOne({ agencyEmail: email });
     console.log(agencyData);
     res.send(agencyData);
-
   } catch (error) {
     res.status(500).send("Internal Server Error");
   }
 };
-
-
 
 // delete a agency
 const deleteAgency = async (req, res) => {
