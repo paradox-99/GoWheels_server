@@ -8,7 +8,9 @@ const {
   updateAgencyOwnerInfo,
   addVehicleByAgency,
   getVehicleInfo,
-  approveAgency, rejectAgency, deleteAgency, setStatus
+  approveAgency, rejectAgency, deleteAgency, setStatus,
+  getOneVehicleDetails,
+  updateOneVehicleInfo
 } = require("../controllers/agencyControllers");
 
 
@@ -27,5 +29,9 @@ Router.put('/agency/owner/updateAgencyOwnerInfo/:email', updateAgencyOwnerInfo);
 Router.patch("/updateUserInfo/:email", updateAgencyOwnerInfo);
 Router.post("/agency/addVehicle", addVehicleByAgency);
 Router.get("/agency/vehicleInfo/:email", getVehicleInfo);
+Router.get("/agency/vehicle-details/:id", getOneVehicleDetails);
+Router.patch("/agency/updateOneVehicleInfo/:id", updateOneVehicleInfo);
+
+
 
 module.exports = Router;

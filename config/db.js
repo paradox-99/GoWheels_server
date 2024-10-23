@@ -4,8 +4,6 @@ require('dotenv').config()
 const uri = `mongodb+srv://${process.env.db_Name}:${process.env.db_Password}@cluster0.jgkyr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 // const uri = `mongodb://localhost:27017`;
 
-
-
 const connectDB = async () => {
     try {
         const client = new MongoClient(uri, {
