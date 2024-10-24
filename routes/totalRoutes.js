@@ -8,4 +8,4 @@ Router.get('/totalInfo', getTotalInfo);
 Router.get('/totalBookings', getBookingStatusCounts);
 
 
-module.exports = Router;
+module.exports = Router; 
