@@ -35,6 +35,7 @@ const getUser = async (req, res) => {
     }
 }
 
+
 const ownerInfo = async (req, res) => {
     try {
         const db = await connectDB();

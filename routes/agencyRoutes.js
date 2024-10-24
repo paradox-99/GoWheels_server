@@ -19,8 +19,8 @@ const {
 
 // Modify Router to accept io parameter
 const router = (io) => {
- 
-const Router = express.Router();
+  const Router = express.Router();
+
  // Define routes
   Router.get("/agency", showAgency);
   Router.get("/agency/owner/:email", agencyOwnerInfo);
