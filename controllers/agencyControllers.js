@@ -27,6 +27,22 @@ const getAgency = async (req, res) => {
   }
 };
 
+const agencyData = async (req, res) => {
+  try {
+    const db = await connectDB();
+    const collection = db.collection("agencyData");
+
+    const email = req.params.email;
+    const query = { userEmail: email }
+
+    const result = await collection.findOne(query)
+    res.send(result);
+  }
+  catch (error) {
+    console.log(error)
+  }
+}
+
 const approveAgency = async (req, res) => {
   try {
     const db = await connectDB();
@@ -356,8 +372,16 @@ const updateOneVehicleInfo = async (req, res) => {
       insuranceNumber,
       insurancePeriod,
       insuranceDetails,
-      additionalInfo: { airConditioning, gps, bluetooth } = {},
-      agencyInfo: { email: userEmail, agencyId: agency_id } = {},
+
+      additionalInfo: {
+        airConditioning,
+        gps,
+        bluetooth,
+      },
+      agencyInfo: {
+        email: userEmail,
+        agencyId: agency_id,
+      }
     } = req.body;
 
     // Build the update document with dot notation for nested fields
@@ -492,4 +516,5 @@ module.exports = {
   getOneVehicleDetails,
   updateOneVehicleInfo,
   getAgencyDataForAgency,
+  agencyData,
 };

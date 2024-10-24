@@ -17,8 +17,6 @@ const totalInfo = require('./routes/totalRoutes');
 const { setupTTLIndex } = require('./controllers/otpControllers');
 
 const app = express();
-
-// Initialize server first before socket.io
 const server = http.createServer(app);
 
 // Now initialize socket.io after the server is created
