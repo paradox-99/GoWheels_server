@@ -1,5 +1,7 @@
 const connectDB = require("../config/db");
 const { ObjectId } = require("mongodb");
+const io  = require('../app');  
+
 
 const showAgency = async (req, res) => {
   try {
@@ -248,20 +250,27 @@ const updateAgencyOwnerInfo = async (req, res) => {
 //     }
 //   };
 
-const addVehicleByAgency = async (req, res) => {
+const addVehicleByAgency = async (req, res, io) => {
   try {
     const db = await connectDB();
     const collection = db.collection("vehiclesData");
     const vehicleData = req.body;
 
-    // console.log(vehicleData);
     const result = await collection.insertOne(vehicleData);
-    res.status(201).send(result); // Respond with the result
+    const newVehicle = await collection.findOne({ _id: result.insertedId });
+    console.log('New vehicle added, emitting notification...'); // Debug log
+    io.emit('newVehicleAdded', { 
+      message: 'A new vehicle has been added!', 
+      vehicle: newVehicle 
+    });
+
+    res.status(201).send(newVehicle);
   } catch (error) {
     console.error("Error adding vehicle:", error);
     res.status(500).send("Error adding vehicle. Please try again later.");
   }
 };
+
 
 // GET THE VEHICLE INFO FOR THAT AGENCY USER
 const getVehicleInfo = async (req, res) => {
