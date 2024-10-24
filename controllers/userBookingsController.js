@@ -227,8 +227,6 @@ const getPendingVehicles = async (req, res) => {
   }
 };
 
-
-
 module.exports = {
   getUserBookedCars,
   getUserBookings,

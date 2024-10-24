@@ -31,8 +31,13 @@ const getFreeCarsForSearchResult = async (req, res) => {
             query['vehicleAvailableBookingArea.upazilla'] = upazilla;
         }
 
-        const cars = await carsCollection.findOne(query);
-        const carId = cars?._id
+        const car = await carsCollection.findOne(query);
+
+        if (!car) {
+            return res.status(200).send({ message: "No car found with the provided details" });
+        }
+
+        const carId = car?._id
         const carIdObject = carId;
         const carIdString = carIdObject.toString();
         const Id = carIdString.slice(0);
@@ -57,10 +62,10 @@ const getFreeCarsForSearchResult = async (req, res) => {
 
         const existingBookings = await bookingsCollection.findOne(bookingQuery);
         if (existingBookings) {
-            return res.send({ message: "no cars available", insertedId: null });
+            return res.status(200).send({ message: "No cars available for the selected dates/times" });
         }
 
-        res.send(cars)
+        res.send(car).status(200);
 
     }
     catch (error) {
