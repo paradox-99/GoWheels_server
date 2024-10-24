@@ -72,7 +72,7 @@ const order = async (req, res) => {
 
             const response = await axios({
                 method: "POST",
-                url: "https://sandbox.sslcommerz.com/gwprocess/v4/api.php",
+                url: `https://sandbox.sslcommerz.com/gwprocess/v4/api.php`,
                 data: initialData,
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded"
