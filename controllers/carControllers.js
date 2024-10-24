@@ -25,7 +25,7 @@ const getFreeCarsForSearchResult = async (req, res) => {
         const query = { brand: selectedBrand };
 
         if (area) {
-            query['vehicleAvailableBookingArea.area'] = area;
+            query['vehicleAvailableBookingArea.area'] = area; 
 
         } else {
             query['vehicleAvailableBookingArea.upazilla'] = upazilla;

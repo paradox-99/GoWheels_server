@@ -15,7 +15,7 @@ const getUserBookings = async (req, res) => {
         if (history){
             query.status = { $in: ['Completed', 'Cancelled'] }
         }
-        const userBookings = await bookingsCollection.find(query).toArray();
+        const userBookings = await bookingsCollection.find(query).toArray(); 
         if (!userBookings.length) {
             console.log("TEST");
             return res.send({ message: 'Ohoo! You do not have any bookings 😌' });
