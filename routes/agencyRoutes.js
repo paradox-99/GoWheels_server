@@ -1,5 +1,4 @@
 const express = require("express");
-
 const {
   showAgency,
   getAgency,
@@ -8,13 +7,19 @@ const {
   updateAgencyOwnerInfo,
   addVehicleByAgency,
   getVehicleInfo,
-  approveAgency, rejectAgency, deleteAgency, setStatus,
+  approveAgency,
+  rejectAgency,
+  deleteAgency,
+  setStatus,
   getOneVehicleDetails,
   updateOneVehicleInfo,
+  getAgencyDataForAgency,
   agencyData
 } = require("../controllers/agencyControllers");
 
-
+// Modify Router to accept io parameter
+const router = (io) => {
+ 
 const Router = express.Router();
 Router.get("/agency", showAgency);
 Router.get("/agency/owner/:email", agencyOwnerInfo);
@@ -33,6 +38,15 @@ Router.get("/agency/vehicle-details/:id", getOneVehicleDetails);
 Router.patch("/agency/updateOneVehicleInfo/:id", updateOneVehicleInfo);
 Router.get('/agencyData/:email', agencyData)
 
+  // Pass io to the addVehicleByAgency controller
+  Router.post("/agency/addVehicle", (req, res) => addVehicleByAgency(req, res, io));
 
+  Router.get("/agency/vehicleInfo/:email", getVehicleInfo);
+  Router.get("/agency/vehicle-details/:id", getOneVehicleDetails);
+  Router.patch("/agency/updateOneVehicleInfo/:id", updateOneVehicleInfo);
+  Router.get("/agencyData/:email", getAgencyDataForAgency);
 
-module.exports = Router;
+  return Router;
+};
+
+module.exports = router;
