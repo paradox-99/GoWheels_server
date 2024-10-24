@@ -25,7 +25,7 @@ const getFreeCarsForSearchResult = async (req, res) => {
         const query = { brand: selectedBrand };
 
         if (area) {
-            query['vehicleAvailableBookingArea.area'] = area; 
+            query['vehicleAvailableBookingArea.area'] = area;
 
         } else {
             query['vehicleAvailableBookingArea.upazilla'] = upazilla;
@@ -47,22 +47,22 @@ const getFreeCarsForSearchResult = async (req, res) => {
             $or: [
                 {
                     $and: [
-                        { fromDate: { $lte: toDate } },
-                        { toDate: { $gte: initailDate } }
+                        { fromDate: { $lte: toDate } },  // booking starts before or on the `toDate`
+                        { toDate: { $gte: initailDate } } // booking ends after or on the `initailDate`
                     ]
                 },
                 {
                     $and: [
-                        { fromTime: { $lte: toTime } },
-                        { toTime: { $gte: initalTime } }
+                        { fromTime: { $lte: toTime } },  // booking time starts before or on the `toTime`
+                        { toTime: { $gte: initalTime } } // booking time ends after or on the `initalTime`
                     ]
                 }
             ]
         };
-
+       
         const existingBookings = await bookingsCollection.findOne(bookingQuery);
         if (existingBookings) {
-            return res.status(200).send({ message: "No cars available for the selected dates/times" });
+            return res.status(404).send({ message: "No car found for this selected date" });
         }
 
         res.send(car).status(200);
