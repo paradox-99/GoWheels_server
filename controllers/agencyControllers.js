@@ -25,6 +25,22 @@ const getAgency = async (req, res) => {
   }
 };
 
+const agencyData = async (req, res) => {
+  try {
+    const db = await connectDB();
+    const collection = db.collection("agencyData");
+
+    const email = req.params.email;
+    const query = { userEmail: email }
+
+    const result = await collection.findOne(query)
+    res.send(result);
+  }
+  catch (error) {
+    console.log(error)
+  }
+}
+
 const approveAgency = async (req, res) => {
   try {
     const db = await connectDB();
@@ -314,7 +330,7 @@ const getOneVehicleDetails = async (req, res) => {
     if (!oneVehicleInfo) {
       return res.status(404).send("Vehicle info not found");
     }
-    
+
     res.send(oneVehicleInfo);
   } catch (error) {
     console.error("Error getting vehicle data:", error);
@@ -352,11 +368,11 @@ const updateOneVehicleInfo = async (req, res) => {
         airConditioning,
         gps,
         bluetooth,
-      } = {}, 
+      } = {},
       agencyInfo: {
         email: userEmail,
         agencyId: agency_id,
-      } = {}, 
+      } = {},
     } = req.body;
 
     // Build the update document with dot notation for nested fields
@@ -472,5 +488,6 @@ module.exports = {
   deleteAgency,
   setStatus,
   getOneVehicleDetails,
-  updateOneVehicleInfo
+  updateOneVehicleInfo,
+  agencyData
 };
