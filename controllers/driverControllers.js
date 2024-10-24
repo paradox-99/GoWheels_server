@@ -21,8 +21,6 @@ const driverData = async (req, res) => {
     }
 };
 
-
-
 const updateStatus = async (req, res) => {
 
     const email = req.params.email;
