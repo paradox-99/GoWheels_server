@@ -274,7 +274,8 @@ const addVehicleByAgency = async (req, res, io) => {
 
     const result = await collection.insertOne(vehicleData);
     const newVehicle = await collection.findOne({ _id: result.insertedId });
-    console.log('New vehicle added, emitting notification...'); // Debug log
+    console.log('New vehicle added, emitting notification...'); 
+    
     io.emit('newVehicleAdded', { 
       message: 'A new vehicle has been added!', 
       vehicle: newVehicle 
