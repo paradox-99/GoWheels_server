@@ -8,9 +8,8 @@ const createCarReview = async (req, res) => {
         const db = await connectDB();
         const carReviewsCollection = db.collection('reviews');
 
-        const { userId, carId, userName, userImage, carName, carImage, review, rating, agencyResponse } = req.body;
+        const { userId,agency_id, carId, userName, userImage, carName, carImage, review, rating, agencyResponse } = req.body;
         // console.log(req.body);
-        // Check if required fields are present
 
         const newReview = {
             userId,
@@ -21,6 +20,7 @@ const createCarReview = async (req, res) => {
             userName,
             userImage,
             reviewImage: carImage,
+            agency_id,
             agencyResponse,
             date: new Date()
         };
@@ -43,6 +43,7 @@ const getCarReviews = async (req, res) => {
 
         const carId = req.params.carId;
         const user = req.query.user === 'true';
+        const agency = req.query.agency === 'true';
         console.log(user);
         let query = {
             carId: carId,
@@ -51,6 +52,12 @@ const getCarReviews = async (req, res) => {
             query =
             {
                 userId: req.params.carId,
+            }
+        }
+        if (agency) {
+            query =
+            {
+                agency_id: req.params.carId,
             }
         }
         console.log(query);
@@ -80,26 +87,28 @@ const getCarReviews = async (req, res) => {
     }
 };
 const updateCarReview = async (req, res) => {
+    
     try {
         const db = await connectDB();
         const carReviewsCollection = db.collection('reviews');
 
         const reviewId = req.params.reviewId;
-        // console.log(reviewId);
+        console.log(reviewId);
+        const agency = req.query.agency === 'true';
         const { review, rating, agencyResponse } = req.body;
-        // console.log(req.body);
-        if (!review || !rating) {
-            return res.status(400).json({ message: "Review and rating are required." });
-        }
-
-        // Update review
-        const updatedReview = {
+        
+        let updatedReview = {
             review,
             rating,
             agencyResponse,
             date: new Date(),
         };
-        console.log(updatedReview);
+        if (agency) {
+            updatedReview = {
+                agencyResponse: agencyResponse
+            }
+        }
+        console.log("updated review",updatedReview, agency);
 
         const result = await carReviewsCollection.updateOne(
             { _id: new ObjectId(reviewId) },
