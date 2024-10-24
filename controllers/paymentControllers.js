@@ -157,4 +157,5 @@ const paymentFail = async (req, res) => {
         res.status(500).send('Error payment');
     }
 }
+
 module.exports = { order, paymentSuccess, paymentFail }

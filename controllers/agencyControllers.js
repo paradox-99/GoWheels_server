@@ -1,5 +1,7 @@
 const connectDB = require("../config/db");
 const { ObjectId } = require("mongodb");
+const io  = require('../app');  
+
 
 const showAgency = async (req, res) => {
   try {
@@ -28,6 +30,22 @@ const getAgency = async (req, res) => {
     res.status(500).send("Error retrieving agency");
   }
 };
+
+const agencyData = async (req, res) => {
+  try {
+    const db = await connectDB();
+    const collection = db.collection("agencyData");
+
+    const email = req.params.email;
+    const query = { userEmail: email }
+
+    const result = await collection.findOne(query)
+    res.send(result);
+  }
+  catch (error) {
+    console.log(error)
+  }
+}
 
 const approveAgency = async (req, res) => {
   try {
@@ -246,20 +264,26 @@ const updateAgencyOwnerInfo = async (req, res) => {
 //     }
 //   };
 
-const addVehicleByAgency = async (req, res) => {
+const addVehicleByAgency = async (req, res, io) => {
   try {
     const db = await connectDB();
     const collection = db.collection("vehiclesData");
     const vehicleData = req.body;
 
-    // console.log(vehicleData);
     const result = await collection.insertOne(vehicleData);
-    res.status(201).send(result); // Respond with the result
+    const newVehicle = await collection.findOne({ _id: result.insertedId });
+    console.log('New vehicle added, emitting notification...'); // Debug log
+    io.emit('newVehicleAdded', { 
+      message: 'A new vehicle has been added!', 
+      vehicle: newVehicle 
+    });
+    res.status(201).send(newVehicle);
   } catch (error) {
     console.error("Error adding vehicle:", error);
     res.status(500).send("Error adding vehicle. Please try again later.");
   }
 };
+
 
 // GET THE VEHICLE INFO FOR THAT AGENCY USER
 const getVehicleInfo = async (req, res) => {
@@ -312,7 +336,7 @@ const getOneVehicleDetails = async (req, res) => {
     if (!oneVehicleInfo) {
       return res.status(404).send("Vehicle info not found");
     }
-    
+
     res.send(oneVehicleInfo);
   } catch (error) {
     console.error("Error getting vehicle data:", error);
@@ -330,7 +354,7 @@ const updateOneVehicleInfo = async (req, res) => {
     // Extract fields from request body
     const {
       licenseNumber,
-      // image: uploadedImage, 
+      // image: uploadedImage,
       seat,
       mileage,
       gear,
@@ -346,15 +370,16 @@ const updateOneVehicleInfo = async (req, res) => {
       insuranceNumber,
       insurancePeriod,
       insuranceDetails,
+
       additionalInfo: {
         airConditioning,
         gps,
         bluetooth,
-      } = {}, 
+      },
       agencyInfo: {
         email: userEmail,
         agencyId: agency_id,
-      } = {}, 
+      }
     } = req.body;
 
     // Build the update document with dot notation for nested fields
@@ -377,7 +402,9 @@ const updateOneVehicleInfo = async (req, res) => {
         ...(insuranceNumber && { insuranceNumber }),
         ...(insurancePeriod && { insurancePeriod }),
         ...(insuranceDetails && { insuranceDetails }),
-        ...(airConditioning && { "additionalInfo.airConditioning": airConditioning }),
+        ...(airConditioning && {
+          "additionalInfo.airConditioning": airConditioning,
+        }),
         ...(gps && { "additionalInfo.gps": gps }),
         ...(bluetooth && { "additionalInfo.bluetooth": bluetooth }),
         ...(userEmail && { "agencyInfo.email": userEmail }),
@@ -401,7 +428,22 @@ const updateOneVehicleInfo = async (req, res) => {
   }
 };
 
+// GET Booking History for a specific agency
+const getAgencyDataForAgency = async (req, res) => {
+  const email = req.params.email;
 
+  try {
+    const db = await connectDB();
+    const collection = db.collection("agencyData");
+
+    // Fetch bookings based on agencyId
+    const agencyData = await collection.findOne({ agencyEmail: email });
+    console.log(agencyData);
+    res.send(agencyData);
+  } catch (error) {
+    res.status(500).send("Internal Server Error");
+  }
+};
 
 // delete a agency
 const deleteAgency = async (req, res) => {
@@ -471,4 +513,6 @@ module.exports = {
   setStatus,
   getOneVehicleDetails,
   updateOneVehicleInfo,
+  getAgencyDataForAgency,
+  agencyData,
 };
