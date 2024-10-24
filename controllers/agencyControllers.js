@@ -263,7 +263,6 @@ const addVehicleByAgency = async (req, res, io) => {
       message: 'A new vehicle has been added!', 
       vehicle: newVehicle 
     });
-
     res.status(201).send(newVehicle);
   } catch (error) {
     console.error("Error adding vehicle:", error);
