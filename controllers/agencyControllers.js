@@ -19,8 +19,12 @@ const getAgency = async (req, res) => {
     const db = await connectDB();
     const collection = db.collection("agencyData");
     const agencyId = req.params.agencyId;
+    console.log(agencyId);
+    
     const query = { agency_id: agencyId };
-    const agency = await collection.find(query).toArray();
+    const agency = await collection.findOne(query);
+    console.log(agency);
+    
     res.send(agency);
   } catch (error) {
     res.status(500).send("Error retrieving agency");
@@ -61,6 +65,7 @@ const approveAgency = async (req, res) => {
     res.status(500).send("Error retrieving agency");
   }
 };
+
 const rejectAgency = async (req, res) => {
   try {
     const db = await connectDB();
@@ -122,27 +127,20 @@ const agencyInfo = async (req, res) => {
 // AGENCY OWNER
 const agencyOwnerInfo = async (req, res) => {
   try {
-    const db = await connectDB(); // Connect to the database
-    const collection = db.collection("users"); // Use the 'users' collection
+    const db = await connectDB();
+    const collection = db.collection("users");
+    const email = req.params.email;
+    console.log(email);
+    
+    const query = { userEmail: email };
+    const ownerData = await collection.findOne(query);
 
-    const email = req.params.email; // Get the email from request parameters
-    const query = { userEmail: email }; // Query to find the user by email
-
-    const ownerData = await collection.findOne(query); // Find the owner data
-
-    // If no owner data found, return a 404 response
     if (!ownerData) {
       return res.status(404).send("Agency owner not found");
     }
-
-    // If owner data found, send the data as a response
     return res.status(200).send(ownerData);
   } catch (error) {
-    // Handle any errors that occur during the process
-    console.error("Error retrieving agency owner information:", error);
-    return res
-      .status(500)
-      .send("Server error while retrieving agency owner info");
+    return res.status(500).send("Server error while retrieving agency owner info");
   }
 };
 
