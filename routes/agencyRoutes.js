@@ -21,7 +21,7 @@ const {
 const router = (io) => {
   const Router = express.Router();
 
-  // Define routes
+ // Define routes
   Router.get("/agency", showAgency);
   Router.get("/agency/owner/:email", agencyOwnerInfo);
   Router.get("/user/:email", agencyOwnerInfo);

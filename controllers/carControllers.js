@@ -25,14 +25,19 @@ const getFreeCarsForSearchResult = async (req, res) => {
         const query = { brand: selectedBrand };
 
         if (area) {
-            query['vehicleAvailableBookingArea.area'] = area; 
+            query['vehicleAvailableBookingArea.area'] = area;
 
         } else {
             query['vehicleAvailableBookingArea.upazilla'] = upazilla;
         }
 
-        const cars = await carsCollection.findOne(query);
-        const carId = cars?._id
+        const car = await carsCollection.findOne(query);
+
+        if (!car) {
+            return res.status(200).send({ message: "No car found with the provided details" });
+        }
+
+        const carId = car?._id
         const carIdObject = carId;
         const carIdString = carIdObject.toString();
         const Id = carIdString.slice(0);
@@ -42,25 +47,25 @@ const getFreeCarsForSearchResult = async (req, res) => {
             $or: [
                 {
                     $and: [
-                        { fromDate: { $lte: toDate } },
-                        { toDate: { $gte: initailDate } }
+                        { fromDate: { $lte: toDate } },  // booking starts before or on the `toDate`
+                        { toDate: { $gte: initailDate } } // booking ends after or on the `initailDate`
                     ]
                 },
                 {
                     $and: [
-                        { fromTime: { $lte: toTime } },
-                        { toTime: { $gte: initalTime } }
+                        { fromTime: { $lte: toTime } },  // booking time starts before or on the `toTime`
+                        { toTime: { $gte: initalTime } } // booking time ends after or on the `initalTime`
                     ]
                 }
             ]
         };
-
+       
         const existingBookings = await bookingsCollection.findOne(bookingQuery);
         if (existingBookings) {
-            return res.send({ message: "no cars available", insertedId: null });
+            return res.status(404).send({ message: "No car found for this selected date" });
         }
 
-        res.send(cars)
+        res.send(car).status(200);
 
     }
     catch (error) {
@@ -122,8 +127,9 @@ const getCarsByBrand = async (req, res) => {
         const db = await connectDB();
         const collection = db.collection('vehiclesData');
         const brand = req.params.brand;
-        const query = { "vehicle_info.brand": brand }
+        const query = { "brand": brand }
         const cars = await collection.find(query).toArray();
+        console.log(cars);
         res.send(cars);
     }
     catch (error) {

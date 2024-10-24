@@ -1,24 +1,24 @@
 const connectDB = require("../config/db");
-const { ObjectId } = require("mongodb");
+const { ObjectId } = require('mongodb');
 
 const getUserBookings = async (req, res) => {
-  try {
-    const db = await connectDB();
-    const bookingsCollection = db.collection("bookings");
-    const userId = req.params.userId;
-    const history = req.query.history === "true";
-    let query = {
-      userId: userId,
-      status: { $in: ["Pending", "Confirmed"] },
-    };
-    if (history) {
-      query.status = { $in: ["Completed", "Cancelled"] };
-    }
-    const userBookings = await bookingsCollection.find(query).toArray();
-    if (!userBookings.length) {
-      console.log("TEST");
-      return res.send({ message: "Ohoo! You do not have any bookings 😌" });
-    }
+    try {
+        const db = await connectDB();
+        const bookingsCollection = db.collection('bookings');
+        const userId = req.params.userId;
+        const history = req.query.history === 'true';
+        let query = {
+            userId: userId,
+            status: { $in: ['Pending', 'Confirmed'] }
+        }
+        if (history){
+            query.status = { $in: ['Completed', 'Cancelled'] }
+        }
+        const userBookings = await bookingsCollection.find(query).toArray();
+        if (!userBookings.length) {
+            console.log("TEST");
+            return res.send({ message: 'Ohoo! You do not have any bookings' });
+        }
 
     res.status(200).json({ userBookings });
   } catch (error) {
@@ -226,8 +226,6 @@ const getPendingVehicles = async (req, res) => {
     res.status(500).send({ message: "Internal server error" });
   }
 };
-
-
 
 module.exports = {
   getUserBookedCars,
