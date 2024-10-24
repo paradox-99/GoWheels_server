@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const http = require('http');
+const http = require('http');  
 const socketIO = require('socket.io');
 
 const authRoutes = require('./routes/authRoutes');
@@ -16,7 +16,7 @@ const otp = require('./routes/otpRoutes');
 const totalInfo = require('./routes/totalRoutes')
 const { setupTTLIndex } = require('./controllers/otpControllers');
 
-const app = express();
+const app = express(); 
 const server = http.createServer(app);
 
 // Configure CORS for Socket.io
