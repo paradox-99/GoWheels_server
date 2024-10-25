@@ -1,5 +1,5 @@
 const express = require('express')
-const { showUsers,getUser, insertUser, updateOne, addOne, replaceData, ownerInfo, updateRole, deleteUser, getModerators, driverInfo, checkUser, updateStatus, updateStatusEmailVerified, driverList} = require('../controllers/userControllers')
+const { showUsers,getUser, insertUser, updateOne, addOne, replaceData, ownerInfo, updateRole, deleteUser, getModerators, driverInfo, checkUser, updateStatus, updateStatusEmailVerified, driverList, getAgencyImage} = require('../controllers/userControllers')
 const Router = express.Router();
 
 Router.get('/users', showUsers);
@@ -20,5 +20,6 @@ Router.patch('/users/role/:id', updateRole)
 Router.get('/driver', driverList)
 Router.get('/moderators', getModerators);
 Router.delete('/deleteUser/:id', deleteUser) 
+Router.get('/agencyImage/:agencyEmail', getAgencyImage) 
 
 module.exports = Router;

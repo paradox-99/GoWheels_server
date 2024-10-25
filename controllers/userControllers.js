@@ -35,6 +35,21 @@ const getUser = async (req, res) => {
     }
 }
 
+const getAgencyImage = async (req, res) => {
+    try {
+        const db = await connectDB();
+        const collection = db.collection('users');
+
+        const email = req.params.agencyEmail;
+        const query = { "userEmail": email }
+        const user = await collection.findOne(query);
+        res.send(user);
+    }
+    catch (error) {
+        console.log(error)
+    }
+}
+
 
 const ownerInfo = async (req, res) => {
     try {
@@ -326,7 +341,7 @@ const deleteUser = async (req, res) => {
 
 const driverList = async (req, res) => {
     const role = req.query.role;
-  
+
     try {
         const db = await connectDB();
         const collection = db.collection('users');
@@ -359,4 +374,4 @@ const getModerators = async (req, res) => {
 
 
 
-module.exports = { showUsers, getUser, insertUser, updateOne, addOne, replaceData, ownerInfo, updateRole, checkUser, updateStatus, driverInfo, deleteUser, getModerators, updateStatusEmailVerified, driverList }
+module.exports = { showUsers, getUser, insertUser, updateOne, addOne, replaceData, ownerInfo, updateRole, checkUser, updateStatus, driverInfo, deleteUser, getModerators, updateStatusEmailVerified, driverList, getAgencyImage }
