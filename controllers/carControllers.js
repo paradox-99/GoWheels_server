@@ -47,14 +47,14 @@ const getFreeCarsForSearchResult = async (req, res) => {
             $or: [
                 {
                     $and: [
-                        { fromDate: { $lte: toDate } },  // booking starts before or on the `toDate`
-                        { toDate: { $gte: initailDate } } // booking ends after or on the `initailDate`
+                        { fromDate: { $lte: toDate } },  
+                        { toDate: { $gte: initailDate } } 
                     ]
                 },
                 {
                     $and: [
-                        { fromTime: { $lte: toTime } },  // booking time starts before or on the `toTime`
-                        { toTime: { $gte: initalTime } } // booking time ends after or on the `initalTime`
+                        { fromTime: { $lte: toTime } },
+                        { toTime: { $gte: initalTime } } 
                     ]
                 }
             ]
