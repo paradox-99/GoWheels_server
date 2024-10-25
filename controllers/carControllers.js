@@ -127,8 +127,9 @@ const getCarsByBrand = async (req, res) => {
         const db = await connectDB();
         const collection = db.collection('vehiclesData');
         const brand = req.params.brand;
-        const query = { "vehicle_info.brand": brand }
+        const query = { "brand": brand }
         const cars = await collection.find(query).toArray();
+        console.log(cars);
         res.send(cars);
     }
     catch (error) {

@@ -1,11 +1,11 @@
 const http = require('http');
-const { app, server } = require('./app.js');  // Adjust the import to destructure properly
+const { app } = require('./app.js');  // Adjust the import to destructure properly
 const dotenv = require('dotenv');
+const socketIO = require('socket.io');
 
 dotenv.config();
 
 const port = process.env.PORT || 3000;
-
 
 app.get('/', (req, res) => {
     res.send("server is running");
