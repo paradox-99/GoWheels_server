@@ -31,7 +31,7 @@ const getFreeCarsForSearchResult = async (req, res) => {
             query['vehicleAvailableBookingArea.upazilla'] = upazilla;
         }
 
-        const car = await carsCollection.findOne(query);
+        const car = await carsCollection.findOne(query);cons
 
         if (!car) {
             return res.status(200).send({ message: "No car found with the provided details" });
@@ -129,7 +129,6 @@ const getCarsByBrand = async (req, res) => {
         const brand = req.params.brand;
         const query = { "brand": brand }
         const cars = await collection.find(query).toArray();
-        console.log(cars);
         res.send(cars);
     }
     catch (error) {
