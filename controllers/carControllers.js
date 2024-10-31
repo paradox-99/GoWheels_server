@@ -20,53 +20,59 @@ const getFreeCarsForSearchResult = async (req, res) => {
         const db = await connectDB();
         const bookingsCollection = db.collection('bookings');
         const carsCollection = db.collection('vehiclesData');
+        const agencies = db.collection('agencyData');
 
-        const { upazilla, area, selectedBrand, initailDate, initalTime, toDate, toTime } = req.query;
-        const query = { brand: selectedBrand };
+        const { fromDate, fromTime, untilDate, untilTime, upazilla, keyArea } = req.query;
 
-        if (area) {
-            query['vehicleAvailableBookingArea.area'] = area;
+        let query;
 
+        // if (keyArea) {
+        //     query = { "agencyAddress.keyArea": keyArea };
+        // } else {
+        //     query = { "agencyAddress.upazilla": upazilla };
+        // }
+        // const Agencies = await agencies.find(query).project({agency_id: 1}).toArray();
+
+        // if (!Agencies) {
+        //     return res.status(200).send({ message: "No car found on your location." });
+        // }
+
+        const date = `${fromDate}T${fromTime}`
+        const queryDate = new Date(date);
+
+        if (keyArea) {
+            query = { 'vehicleAvailableBookingArea.area': keyArea };
         } else {
-            query['vehicleAvailableBookingArea.upazilla'] = upazilla;
+            query = { 'vehicleAvailableBookingArea.upazilla': upazilla };
         }
 
-        const car = await carsCollection.findOne(query);
+        const cars = await carsCollection.find(query).toArray();
 
-        if (!car) {
-            return res.status(200).send({ message: "No car found with the provided details" });
+        if (!cars) {
+            return res.status(200).send({ message: "No car found on your search location." });
         }
 
-        const carId = car?._id
-        const carIdObject = carId;
-        const carIdString = carIdObject.toString();
-        const Id = carIdString.slice(0);
+        await Promise.all(
+            cars.map(async (car) => {
+                const carId = car._id.toString();
 
-        const bookingQuery = {
-            carId: Id,
-            $or: [
-                {
+                const bookingQuery = {
                     $and: [
-                        { fromDate: { $lte: toDate } },  // booking starts before or on the `toDate`
-                        { toDate: { $gte: initailDate } } // booking ends after or on the `initailDate`
+                        { carId: carId },
+                        { dropoffDate: { $lt: queryDate } }
                     ]
-                },
-                {
-                    $and: [
-                        { fromTime: { $lte: toTime } },  // booking time starts before or on the `toTime`
-                        { toTime: { $gte: initalTime } } // booking time ends after or on the `initalTime`
-                    ]
+                };
+
+                const existingBookings = await bookingsCollection.findOne(bookingQuery);
+
+                if (!existingBookings){
+                    const index = cars.indexOf(car);
+                    cars.splice(index, 1);
                 }
-            ]
-        };
-       
-        const existingBookings = await bookingsCollection.findOne(bookingQuery);
-        if (existingBookings) {
-            return res.status(404).send({ message: "No car found for this selected date" });
-        }
-
-        res.send(car).status(200);
-
+            })
+        );
+        
+        res.send(cars).status(200);
     }
     catch (error) {
         res.status(500).json({ message: 'Error fetching booked cars' });
