@@ -31,7 +31,7 @@ const getFreeCarsForSearchResult = async (req, res) => {
             query['vehicleAvailableBookingArea.upazilla'] = upazilla;
         }
 
-        const car = await carsCollection.findOne(query);
+        const car = await carsCollection.findOne(query);cons
 
         if (!car) {
             return res.status(200).send({ message: "No car found with the provided details" });
@@ -47,14 +47,14 @@ const getFreeCarsForSearchResult = async (req, res) => {
             $or: [
                 {
                     $and: [
-                        { fromDate: { $lte: toDate } },  // booking starts before or on the `toDate`
-                        { toDate: { $gte: initailDate } } // booking ends after or on the `initailDate`
+                        { fromDate: { $lte: toDate } },  
+                        { toDate: { $gte: initailDate } } 
                     ]
                 },
                 {
                     $and: [
-                        { fromTime: { $lte: toTime } },  // booking time starts before or on the `toTime`
-                        { toTime: { $gte: initalTime } } // booking time ends after or on the `initalTime`
+                        { fromTime: { $lte: toTime } },
+                        { toTime: { $gte: initalTime } } 
                     ]
                 }
             ]
@@ -129,7 +129,6 @@ const getCarsByBrand = async (req, res) => {
         const brand = req.params.brand;
         const query = { "brand": brand }
         const cars = await collection.find(query).toArray();
-        console.log(cars);
         res.send(cars);
     }
     catch (error) {

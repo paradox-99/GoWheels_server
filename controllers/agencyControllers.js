@@ -1,6 +1,6 @@
 const connectDB = require("../config/db");
 const { ObjectId } = require("mongodb");
-const io  = require('../app');  
+const io = require('../app');
 
 
 const showAgency = async (req, res) => {
@@ -20,11 +20,10 @@ const getAgency = async (req, res) => {
     const collection = db.collection("agencyData");
     const agencyId = req.params.agencyId;
     console.log(agencyId);
-    
+
     const query = { agency_id: agencyId };
     const agency = await collection.findOne(query);
-    console.log(agency);
-    
+
     res.send(agency);
   } catch (error) {
     res.status(500).send("Error retrieving agency");
@@ -130,8 +129,7 @@ const agencyOwnerInfo = async (req, res) => {
     const db = await connectDB();
     const collection = db.collection("users");
     const email = req.params.email;
-    console.log(email);
-    
+
     const query = { userEmail: email };
     const ownerData = await collection.findOne(query);
 
@@ -272,11 +270,10 @@ const addVehicleByAgency = async (req, res, io) => {
 
     const result = await collection.insertOne(vehicleData);
     const newVehicle = await collection.findOne({ _id: result.insertedId });
-    console.log('New vehicle added, emitting notification...'); 
-    
-    io.emit('newVehicleAdded', { 
-      message: 'A new vehicle has been added!', 
-      vehicle: newVehicle 
+
+    io.emit('newVehicleAdded', {
+      message: 'A new vehicle has been added!',
+      vehicle: newVehicle
     });
     res.status(201).send(newVehicle);
   } catch (error) {
@@ -439,7 +436,6 @@ const getAgencyDataForAgency = async (req, res) => {
 
     // Fetch bookings based on agencyId
     const agencyData = await collection.findOne({ agencyEmail: email });
-    console.log(agencyData);
     res.send(agencyData);
   } catch (error) {
     res.status(500).send("Internal Server Error");

@@ -2,6 +2,7 @@ const http = require('http');
 const { app } = require('./app.js');  // Adjust the import to destructure properly
 const dotenv = require('dotenv');
 const socketIO = require('socket.io');
+const {server} = require('./app.js')
 
 dotenv.config();
 
