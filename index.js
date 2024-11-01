@@ -12,6 +12,6 @@ app.get('/', (req, res) => {
 });
 
 // Listen on the same server created in app.js
-server.listen(port, () => {
+app.listen(port, () => {
     console.log("running on port: ", port);
 });
