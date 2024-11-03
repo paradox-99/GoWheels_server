@@ -102,10 +102,8 @@ const paymentSuccess = async (req, res) => {
             { tranjectionId: req.params.tranId }, 
             { $set: { paidStatus: true } }
         );
-
-        
+  
         if (result?.modifiedCount > 0) {
-
              res.redirect(`http://localhost:5173/payment/success/${req.params?.tranId}`);
             await sendEmail(
                 'masumbillah2062003@gmail.com',
