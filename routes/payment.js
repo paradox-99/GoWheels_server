@@ -1,5 +1,5 @@
 const express = require("express");
-const { order, paymentSuccess, paymentFail } = require("../controllers/paymentControllers");
+const { order, paymentSuccess, paymentFail,  } = require("../controllers/paymentControllers");
 const router = express.Router();
 
 router.post("/order", order);
