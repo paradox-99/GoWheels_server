@@ -20,7 +20,7 @@ const getFreeCarsForSearchResult = async (req, res) => {
         const db = await connectDB();
         const bookingsCollection = db.collection('bookings');
         const carsCollection = db.collection('vehiclesData');
-        const agencies = db.collection('agencyData');
+        // const agencies = db.collection('agencyData');
 
         const { fromDate, fromTime, untilDate, untilTime, upazilla, keyArea } = req.query;
 
@@ -51,7 +51,7 @@ const getFreeCarsForSearchResult = async (req, res) => {
         if (!cars) {
             return res.status(200).send({ message: "No car found on your search location." });
         }
-
+ 
         await Promise.all(
             cars.map(async (car) => {
                 const carId = car._id.toString();
@@ -64,7 +64,6 @@ const getFreeCarsForSearchResult = async (req, res) => {
                 };
 
                 const existingBookings = await bookingsCollection.findOne(bookingQuery);
-
                 if (!existingBookings){
                     const index = cars.indexOf(car);
                     cars.splice(index, 1);
