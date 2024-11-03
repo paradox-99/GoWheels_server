@@ -23,7 +23,6 @@ const getFreeCarsForSearchResult = async (req, res) => {
         // const agencies = db.collection('agencyData');
 
         const { fromDate, fromTime, untilDate, untilTime, upazilla, keyArea } = req.query;
-
         let query;
 
         // if (keyArea) {

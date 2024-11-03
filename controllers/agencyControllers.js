@@ -124,8 +124,6 @@ const agencyOwnerInfo = async (req, res) => {
     const db = await connectDB();
     const collection = db.collection("users");
     const email = req.params.email;
-    console.log(email);
-
     const query = { userEmail: email };
     const ownerData = await collection.findOne(query);
 
@@ -266,8 +264,6 @@ const addVehicleByAgency = async (req, res, io) => {
 
     const result = await collection.insertOne(vehicleData);
     const newVehicle = await collection.findOne({ _id: result.insertedId });
-    console.log('New vehicle added, emitting notification...');
-
     io.emit('newVehicleAdded', {
       message: 'A new vehicle has been added!',
       vehicle: newVehicle
@@ -433,7 +429,6 @@ const getAgencyDataForAgency = async (req, res) => {
 
     // Fetch bookings based on agencyId
     const agencyData = await collection.findOne({ agencyEmail: email });
-    console.log(agencyData);
     res.send(agencyData);
   } catch (error) {
     res.status(500).send("Internal Server Error");

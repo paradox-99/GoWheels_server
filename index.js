@@ -2,6 +2,7 @@ const http = require('http');
 const { app, server } = require('./app.js');  // Adjust the import to destructure properly
 const dotenv = require('dotenv');
 const socketIO = require('socket.io');
+const {server} = require('./app.js')
 
 dotenv.config();
 
@@ -12,6 +13,6 @@ app.get('/', (req, res) => {
 });
 
 // Listen on the same server created in app.js
-server.listen(port, () => {
+app.listen(port, () => {
     console.log("running on port: ", port);
 });
