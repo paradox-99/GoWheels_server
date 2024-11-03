@@ -36,61 +36,6 @@ const order = async (req, res) => {
         if (method === "driver") {
             payablePrice = (calculatedCost + drivingCost) - discount
         }
-
-        const initialData = {
-            store_id: "gowhe6703a1593988b",
-            store_passwd: "gowhe6703a1593988b@ssl",
-            total_amount: payablePrice,
-            currency: "BDT",
-            tran_id: tran_id, 
-            success_url: `http://localhost:3000/api/payment/success`,
-            fail_url: `http://localhost:3000/api/payment/fail`,
-            cancel_url: 'http://localhost:3030/cancel',
-            ipn_url: 'http://localhost:3030/ipn',
-            shipping_method: 'Courier',
-            car_name: 'Computer.',
-            car_category: 'Electronic',
-            car_profile: 'general',
-            cus_name: "cus_name",
-            cus_email: userEmail,
-            cus_add1: division,
-            cus_add2: district,
-            cus_city: upazilla,
-            cus_state: area ? area : 'no area',
-            cus_postcode: '1000',
-            cus_country: 'Bangladesh',
-            cus_phone: '01711111111',
-            cus_fax: '01711111111',
-            ship_name: 'Customer Name',
-            ship_add1: 'Dhaka',
-            ship_add2: 'Dhaka',
-            ship_city: 'Dhaka',
-            ship_state: 'Dhaka',
-            ship_postcode: 1000,
-            ship_country: 'Bangladesh',
-            product_name: carInfo.brand,
-            product_category: "product_category",
-            product_profile: "product_profile"
-        };
-return
-        const response = await axios({
-            method: "POST",
-            url: `https://sandbox.sslcommerz.com/gwprocess/v4/api.php`,
-            data: initialData,
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded"
-            }
-        })
-
-        console.log("response : ", response?.data?.GatewayPageURL)
-        res.send({ url: response?.data?.GatewayPageURL })
-        console.log("response : ", response?.data?.GatewayPageURL)
-        res.send({ url: response?.data?.GatewayPageURL })
-
-        const finalOrder = {
-            car, paidStatus: false, tranjectionId: tran_id,
-        }
-        const result = paymentCollection.insertOne(finalOrder)
         
     }
     catch (error) {
