@@ -22,6 +22,7 @@ const getFreeCarsForSearchResult = async (req, res) => {
         const carsCollection = db.collection('vehiclesData');
 
         const { upazilla, area, selectedBrand, initailDate, initalTime, toDate, toTime } = req.query;
+
         const query = { brand: selectedBrand };
 
         if (area) {
@@ -31,41 +32,48 @@ const getFreeCarsForSearchResult = async (req, res) => {
             query['vehicleAvailableBookingArea.upazilla'] = upazilla;
         }
 
-        const car = await carsCollection.findOne(query);cons
+        const cars = await carsCollection.find(query).toArray();
 
-        if (!car) {
+
+        if (cars.length === 0) {
             return res.status(200).send({ message: "No car found with the provided details" });
         }
 
-        const carId = car?._id
-        const carIdObject = carId;
-        const carIdString = carIdObject.toString();
-        const Id = carIdString.slice(0);
+        const availableCars = [];
 
-        const bookingQuery = {
-            carId: Id,
-            $or: [
-                {
-                    $and: [
-                        { fromDate: { $lte: toDate } },  
-                        { toDate: { $gte: initailDate } } 
-                    ]
-                },
-                {
-                    $and: [
-                        { fromTime: { $lte: toTime } },
-                        { toTime: { $gte: initalTime } } 
-                    ]
-                }
-            ]
-        };
-       
-        const existingBookings = await bookingsCollection.findOne(bookingQuery);
-        if (existingBookings) {
+        for (const car of cars) {
+            const carIdString = car._id.toString();
+
+            const bookingQuery = {
+                carId: carIdString,
+                $or: [
+                    {
+                        $and: [
+                            { fromDate: { $lte: toDate } },
+                            { toDate: { $gte: initailDate } }
+                        ]
+                    },
+                    {
+                        $and: [
+                            { fromTime: { $lte: toTime } },
+                            { toTime: { $gte: initalTime } }
+                        ]
+                    }
+                ]
+            };
+
+            const existingBooking = await bookingsCollection.find(bookingQuery).toArray();
+
+            if (existingBooking.length === 0) {
+                availableCars.push(car);
+            }
+        }
+
+        if (availableCars.length === 0) {
             return res.status(404).send({ message: "No car found for this selected date" });
         }
 
-        res.send(car).status(200);
+        return res.status(200).send(availableCars);
 
     }
     catch (error) {

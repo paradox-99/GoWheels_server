@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const http = require('http');
-const socketIO = require('socket.io'); 
+const socketIO = require('socket.io');
 
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
@@ -19,6 +19,17 @@ const { setupTTLIndex } = require('./controllers/otpControllers');
 const app = express();
 const server = http.createServer(app);
 
+const corsOptions = {
+    origin: [
+        "http://localhost:5176",
+        'http://localhost:5172',
+        'http://localhost:5173',
+        'http://localhost:5174',
+        'http://localhost:5175',
+        'https://gowheels-99.web.app',
+    ],
+    credentials: true
+}
 // Now initialize socket.io after the server is created
 const io = socketIO(server, {
     cors: {
@@ -48,17 +59,7 @@ io.on('connection', (socket) => {
 const agency = require('./routes/agencyRoutes')(io);
 
 // Configure CORS for Express
-app.use(cors({
-    origin: [
-        "http://localhost:5176",
-        'http://localhost:5172',
-        'http://localhost:5173',
-        'http://localhost:5174',
-        'http://localhost:5175',
-        'https://gowheels-99.web.app',
-    ],
-    credentials: true
-}));
+app.use(cors(corsOptions));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
