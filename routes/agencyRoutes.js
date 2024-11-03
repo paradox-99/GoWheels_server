@@ -39,7 +39,7 @@ const router = (io) => {
   Router.patch('/agencyBlock/:id', setStatus);
   Router.put('/agency/owner/updateAgencyOwnerInfo/:email', updateAgencyOwnerInfo);
   Router.patch("/updateUserInfo/:email", updateAgencyOwnerInfo);
-
+  Router.get("/agencyInformation/:email", agencyData)
   // Pass io to the addVehicleByAgency controller
   Router.post("/agency/addVehicle", (req, res) => addVehicleByAgency(req, res, io));
 
