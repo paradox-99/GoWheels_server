@@ -43,10 +43,10 @@ const order = async (req, res) => {
             total_amount: payablePrice,
             currency: "BDT",
             tran_id: tran_id,
-            success_url: `http://localhost:3000/api/payment/success/${tran_id}`,
-            fail_url: `http://localhost:3000/api/payment/fail/${tran_id}`,
-            cancel_url: 'http://localhost:3030/cancel',
-            ipn_url: 'http://localhost:3030/ipn',
+            success_url: `https://go-wheels-server.vercel.app/payment/success/${tran_id}`,
+            fail_url: `https://go-wheels-server.vercel.app/payment/fail/${tran_id}`,
+            cancel_url: 'https://go-wheels-server.vercel.app/cancel',
+            ipn_url: 'https://go-wheels-server.vercel.app/ipn',
             shipping_method: 'Courier',
             car_name: 'Computer.',
             car_category: 'Electronic',
@@ -104,7 +104,7 @@ const paymentSuccess = async (req, res) => {
         );
   
         if (result?.modifiedCount > 0) {
-             res.redirect(`http://localhost:5173/payment/success/${req.params?.tranId}`);
+             res.redirect(`https://gowheels-99.web.app/payment/success/${req.params?.tranId}`);
             await sendEmail(
                 'masumbillah2062003@gmail.com',
                 'John Doe',
@@ -113,7 +113,7 @@ const paymentSuccess = async (req, res) => {
                 '2024-10-20'
             );
 
-            return res.redirect(`http://localhost:5173/payment/success/${req.params.tranId}`);
+            return res.redirect(`https://gowheels-99.web.app/payment/success/${req.params.tranId}`);
         } else {
             return res.status(404).send('Transaction not found or already updated.');
         }
@@ -131,7 +131,7 @@ const paymentFail = async (req, res) => {
         const result = await paymentCollection.deleteOne({ tranjectionId: req.params.tranId })
 
         if (result.deletedCount) {
-            res.redirect(`http://localhost:5173/payment/fail/${req.params.tranId}`)
+            res.redirect(`https://gowheels-99.web.app/payment/fail/${req.params.tranId}`)
         }
     } catch (error) {
         res.status(500).send('Error payment');
