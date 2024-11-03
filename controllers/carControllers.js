@@ -51,7 +51,7 @@ const getFreeCarsForSearchResult = async (req, res) => {
         if (!cars) {
             return res.status(200).send({ message: "No car found on your search location." });
         }
- 
+
         await Promise.all(
             cars.map(async (car) => {
                 const carId = car._id.toString();
@@ -64,13 +64,13 @@ const getFreeCarsForSearchResult = async (req, res) => {
                 };
 
                 const existingBookings = await bookingsCollection.findOne(bookingQuery);
-                if (!existingBookings){
+                if (!existingBookings) {
                     const index = cars.indexOf(car);
                     cars.splice(index, 1);
                 }
             })
         );
-        
+
         res.send(cars).status(200);
     }
     catch (error) {
@@ -125,8 +125,6 @@ const vehiclesInfo = async (req, res) => {
     }
 };
 
-
-
 const getCarsByBrand = async (req, res) => {
     try {
         const db = await connectDB();
@@ -134,7 +132,9 @@ const getCarsByBrand = async (req, res) => {
         const brand = req.params.brand;
         const query = { "brand": brand }
         const cars = await collection.find(query).toArray();
-        console.log(cars);
+        if (!cars) {
+            res.status(204).send("Sorry. Currently no available.")
+        }
         res.send(cars);
     }
     catch (error) {
@@ -142,5 +142,27 @@ const getCarsByBrand = async (req, res) => {
     }
 }
 
+const getCarsByLocation = async (req, res) => {
+    try {
+        const db = await connectDB();
+        const collection = db.collection('vehiclesData');
+        const { district, upazilla } = req.query;
+        let query;
+        if (district) {
+            query = { "vehicleAvailableBookingArea.district": district };
+        }
+        else if (upazilla) {
+            query = { "vehicleAvailableBookingArea.upazilla": upazilla };
+        }
 
-module.exports = { showCars, getVehiclesAgency, getVehicle, getCarsByBrand, vehiclesInfo, getFreeCarsForSearchResult }
+        const cars = await collection.find(query).toArray();
+        if (!cars) {
+            res.status(204).send("Sorry. Currently no available.")
+        }
+        res.send(cars);
+    } catch (error) {
+        res.status(500).send('Error retrieving vehicle.');
+    }
+}
+
+module.exports = { showCars, getVehiclesAgency, getVehicle, getCarsByBrand, vehiclesInfo, getFreeCarsForSearchResult, getCarsByLocation }
