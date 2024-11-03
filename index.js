@@ -1,17 +1,18 @@
 const http = require('http');
-const app = require('./app.js');
-const dotenv = require('dotenv')
+const { app, server } = require('./app.js');  // Adjust the import to destructure properly
+const dotenv = require('dotenv');
+const socketIO = require('socket.io');
+const {server} = require('./app.js')
 
 dotenv.config();
 
 const port = process.env.PORT || 3000;
 
-const server = http.createServer(app)
-
 app.get('/', (req, res) => {
     res.send("server is running");
-})
+});
 
-server.listen(port, () => {
+// Listen on the same server created in app.js
+app.listen(port, () => {
     console.log("running on port: ", port);
-})
+});

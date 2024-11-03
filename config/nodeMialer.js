@@ -32,7 +32,7 @@ const sendOTPEmail = async (userEmail, otp) => {
 const sendEmail = async (userEmail, userName, carId, carModel, bookingDate) => {
   const mailOptions = {
     from: process.env.EMAIL,
-    to: "farzana.hossain147@gmail.com",
+    to: userEmail,
     subject: "Car Booking Confirmation",
     text: `Hello ${userName},\n\nYour booking for the car ${carModel} (ID: ${carId}) has been confirmed. Your booking is scheduled for ${bookingDate}.\n\nThank you for choosing GoWheels! Enjoy your ride!\n\nBest regards,\nGoWheels Team`,
   };

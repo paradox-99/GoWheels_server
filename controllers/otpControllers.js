@@ -16,7 +16,7 @@ const replaceOTP = async (req, res) => {
             userEmail: email,
             otp: newOTP,
             createdAt: new Date(),
-            expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+            expiresAt: new Date(Date.now() + 2 * 60 * 1000),
         };
 
         const result = await collection.replaceOne(
@@ -35,7 +35,7 @@ const replaceOTP = async (req, res) => {
     }
 }
 
-const verifyOTP = async (req, res) => {
+const verifyOTP = async (req, res) => { 
     const { email, otp } = req.body;
 
     try {

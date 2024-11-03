@@ -10,7 +10,7 @@ const generateAndStoreOTP = async (userEmail) => {
     const otpDetails = {
         otp,
         createdAt: new Date(),
-        expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+        expiresAt: new Date(Date.now() + 2 * 60 * 1000),
     };
 
     try {

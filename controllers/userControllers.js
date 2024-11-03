@@ -27,7 +27,6 @@ const getUser = async (req, res) => {
         const email = req.params.email;
         const query = { "userEmail": email }
         const user = await collection.findOne(query);
-        // console.log(user);
         res.send(user);
 
     }
@@ -36,13 +35,46 @@ const getUser = async (req, res) => {
     }
 }
 
+const getAgencyImage = async (req, res) => {
+    try {
+        const db = await connectDB();
+        const collection = db.collection('users');
+
+        const email = req.params.agencyEmail;
+        const query = { "userEmail": email }
+        const user = await collection.findOne(query);
+        res.send(user);
+    }
+    catch (error) {
+        console.log(error)
+    }
+}
+
+
 const ownerInfo = async (req, res) => {
     try {
         const db = await connectDB();
         const collection = db.collection('users');
         const ownerData = req.body;
-        const result = await collection.insertOne(ownerData);
-        res.status(201).json({ message: 'Data inserted successfully', result });
+        const options = {
+            ...ownerData,
+            userRole: 'agency',
+            accountStatus: 'not verified',
+            emailVerified: 'not verified',
+            creationTime: new Date().toISOString().split('T')[0]
+        }
+        const query = { userEmail: ownerData?.userEmail };
+        const existUser = await collection.findOne(query);
+        if (existUser) {
+            return res.send({ message: "user already exists", insertedId: null });
+        }
+
+        const result = await collection.insertOne(options);
+        if (result.insertedId) {
+            const otp = await generateAndStoreOTP(ownerData?.userEmail);
+            await sendOTPEmail(ownerData?.userEmail, otp)
+            return res.send(result);
+        }
     } catch (error) {
         res.status(500).json({ message: 'Error inserting data', error });
     }
@@ -57,7 +89,8 @@ const driverInfo = async (req, res) => {
             ...user,
             userRole: 'driver',
             accountStatus: 'not verified',
-            emailVerified: 'not verified'
+            emailVerified: 'not verified',
+            creationTime: new Date().toISOString().split('T')[0]
         }
         const query = { userEmail: user?.userEmail };
         const existUser = await collection.findOne(query);
@@ -308,7 +341,7 @@ const deleteUser = async (req, res) => {
 
 const driverList = async (req, res) => {
     const role = req.query.role;
-  
+
     try {
         const db = await connectDB();
         const collection = db.collection('users');
@@ -339,4 +372,6 @@ const getModerators = async (req, res) => {
     }
 };
 
-module.exports = { showUsers, getUser, insertUser, updateOne, addOne, replaceData, ownerInfo, updateRole, checkUser, updateStatus, driverInfo, deleteUser, getModerators, updateStatusEmailVerified, driverList }
+
+
+module.exports = { showUsers, getUser, insertUser, updateOne, addOne, replaceData, ownerInfo, updateRole, checkUser, updateStatus, driverInfo, deleteUser, getModerators, updateStatusEmailVerified, driverList, getAgencyImage }

@@ -21,64 +21,30 @@ const driverData = async (req, res) => {
     }
 };
 
-
-
-const updateStatus = async (req, res) => {
-
-    const email = req.params.email;
-    const { accountStatus } = req.body;
-
+const getDrivers = async (req, res) => {
     try {
         const db = await connectDB();
         const collection = db.collection('users');
+        const { district } = req.query; // Get the district from the query parameters
 
-        const result = await collection.updateOne(
-            { userEmail: email },
-            { $set: { accountStatus } }
-        );
-
-        if (result.modifiedCount > 0) {
-            return res.send(result);
-        } else {
-            return res.status(404).send({ message: "User not found or no changes made." });
+        const query = { userRole: 'driver' }; 
+        if (district) {
+            query['userAddress.division'] = { $regex: district, $options: 'i' }; // Use district for regex search
         }
+        // if (upazilla) {
+        //     query['userAddress.upazilla'] = upazilla; // Exact match for upazilla
+        // }
+
+
+        const drivers = await collection.find(query).toArray();
+        res.status(200).json(drivers);
+
+    } catch (error) {
+        console.error("Error fetching drivers: ", error);
+        res.status(500).json({ message: "Internal server error" });
     }
-    catch (error) {
-        console.log(error)
-        res.status(500).send("Server error while updating account status.");
-    }
-}
+};
 
 
 
-const insertUser = async (req, res) => {
-    try {
-        const db = await connectDB();
-        const collection = db.collection('users');
-
-        const user = req.body;
-        const options = {
-            ...user,
-            userRole: 'user',
-            accountStatus: 'not verified',
-            drivingLicense: 'unavailable'
-        }
-        const query = { userEmail: user?.userEmail };
-        const existUser = await collection.findOne(query);
-        if (existUser) {
-            return res.send({ message: "user already exists", insertedId: null });
-        }
-
-        const result = await collection.insertOne(options);
-        if (result.insertedId) {
-            const otp = await generateAndStoreOTP(user?.userEmail);
-            await sendOTPEmail(user?.userEmail, otp)
-            return res.send(result);
-        }
-    }
-    catch (error) {
-        return res.status(500).send('Error retrieving user');
-    }
-}
-
-module.exports = { driverData }
+module.exports = { driverData, getDrivers }
